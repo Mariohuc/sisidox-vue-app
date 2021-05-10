@@ -21,6 +21,7 @@
           >
         </p>
       </v-col>
+      <v-col><Login></Login></v-col>
 
       <v-col class="mb-5" cols="12">
         <h2 class="headline font-weight-bold mb-3">What's next?</h2>
@@ -75,10 +76,13 @@
 
 <script lang="ts">
 import Vue from "vue";
+import Login from "@/components/Login.vue";
 
 export default Vue.extend({
   name: "HelloWorld",
-
+  components: {
+    Login,
+  },
   data: () => ({
     ecosystem: [
       {
