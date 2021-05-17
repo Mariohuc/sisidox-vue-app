@@ -1,8 +1,7 @@
 import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 import Home from "../views/Home.vue";
-import Doctor from "../views/Doctor.vue";
-import Patient from "../views/Patient.vue";
+import AppointmentSearch from "../views/AppointmentSearch.vue";
 
 Vue.use(VueRouter);
 
@@ -13,14 +12,19 @@ const routes: Array<RouteConfig> = [
     component: Home,
   },
   {
+    path: '/appointment-search',
+    name: "AppointmentSearch",
+    component: AppointmentSearch
+  },
+  {
     path: "/doctor",
     name: "Doctor",
-    component: Doctor
+    component:  () => import("../views/Doctor.vue")
   },
   {
     path: "/patient",
     name: "Patient",
-    component: Patient
+    component: () => import("../views/Patient.vue")
   },
   {
     path: "/about",

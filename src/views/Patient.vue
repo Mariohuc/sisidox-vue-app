@@ -7,12 +7,8 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn icon>
-        <v-icon>mdi-heart</v-icon>
-      </v-btn>
-
-      <v-btn icon>
-        <v-icon>mdi-magnify</v-icon>
+      <v-btn icon to="/">
+        <v-icon>mdi-home</v-icon>
       </v-btn>
 
       <v-menu left bottom>
@@ -75,14 +71,17 @@ import { Menu, Role } from "@/store/models";
   name: "Patient"
 })
 export default class Patient extends Vue {
+  title = "Sisidox | Panel de paciente";
   tab = null;
   items: Menu[] = [];
 
   text =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
   created(): void{
+    document.title = this.title;
     this.getMenuItems();
   }
+  
   getMenuItems(): void{
     MenuItemsStore.MENUITEMS.map(item => {
       if(item.belongTo.find( rol => rol === Role.PATIENT)) this.items.push(item);

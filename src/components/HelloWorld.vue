@@ -24,50 +24,19 @@
       <v-col><Login></Login></v-col>
 
       <v-col class="mb-5" cols="12">
-        <h2 class="headline font-weight-bold mb-3">What's next?</h2>
-
-        <v-row justify="center">
-          <a
-            v-for="(next, i) in whatsNext"
-            :key="i"
-            :href="next.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ next.text }}
-          </a>
-        </v-row>
-      </v-col>
-
-      <v-col class="mb-5" cols="12">
         <h2 class="headline font-weight-bold mb-3">Important Links</h2>
 
         <v-row justify="center">
-          <a
-            v-for="(link, i) in importantLinks"
-            :key="i"
-            :href="link.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ link.text }}
-          </a>
-        </v-row>
-      </v-col>
-
-      <v-col class="mb-5" cols="12">
-        <h2 class="headline font-weight-bold mb-3">Ecosystem</h2>
-
-        <v-row justify="center">
-          <a
-            v-for="(eco, i) in ecosystem"
-            :key="i"
-            :href="eco.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ eco.text }}
-          </a>
+          <v-btn color="primary" class="mx-2" to="/patient">
+            <v-icon dark class="mr-1"> mdi-account-heart </v-icon> Panel de paciente
+          </v-btn>
+          <v-btn color="primary" class="mx-2" to="/doctor">
+            <v-icon dark class="mr-1"> mdi-doctor </v-icon> Panel de doctor
+          </v-btn>
+          <v-btn color="secondary" class="mx-2" to="/appointment-search">
+            <v-icon dark class="mr-1"> mdi-table-search </v-icon> Busca tu cita
+          </v-btn>
+          
         </v-row>
       </v-col>
     </v-row>
@@ -81,60 +50,59 @@ import Login from "@/components/Login.vue";
 export default Vue.extend({
   name: "HelloWorld",
   components: {
-    Login,
+    Login
   },
   data: () => ({
     ecosystem: [
       {
         text: "vuetify-loader",
-        href: "https://github.com/vuetifyjs/vuetify-loader",
+        href: "https://github.com/vuetifyjs/vuetify-loader"
       },
       {
         text: "github",
-        href: "https://github.com/vuetifyjs/vuetify",
+        href: "https://github.com/vuetifyjs/vuetify"
       },
       {
         text: "awesome-vuetify",
-        href: "https://github.com/vuetifyjs/awesome-vuetify",
-      },
+        href: "https://github.com/vuetifyjs/awesome-vuetify"
+      }
     ],
     importantLinks: [
       {
         text: "Documentation",
-        href: "https://vuetifyjs.com",
+        href: "https://vuetifyjs.com"
       },
       {
         text: "Chat",
-        href: "https://community.vuetifyjs.com",
+        href: "https://community.vuetifyjs.com"
       },
       {
         text: "Made with Vuetify",
-        href: "https://madewithvuejs.com/vuetify",
+        href: "https://madewithvuejs.com/vuetify"
       },
       {
         text: "Twitter",
-        href: "https://twitter.com/vuetifyjs",
+        href: "https://twitter.com/vuetifyjs"
       },
       {
         text: "Articles",
-        href: "https://medium.com/vuetify",
-      },
+        href: "https://medium.com/vuetify"
+      }
     ],
     whatsNext: [
       {
         text: "Explore components",
-        href: "https://vuetifyjs.com/components/api-explorer",
+        href: "https://vuetifyjs.com/components/api-explorer"
       },
       {
         text: "Select a layout",
-        href: "https://vuetifyjs.com/getting-started/pre-made-layouts",
+        href: "https://vuetifyjs.com/getting-started/pre-made-layouts"
       },
       {
         text: "Frequently Asked Questions",
-        href:
-          "https://vuetifyjs.com/getting-started/frequently-asked-questions",
-      },
-    ],
-  }),
+        href: "https://vuetifyjs.com/getting-started/frequently-asked-questions"
+      }
+    ]
+  })
 });
 </script>

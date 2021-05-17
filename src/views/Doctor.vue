@@ -1,19 +1,16 @@
 <template>
-  <v-card class="overflow-hidden">
+  <v-card class="overflow-hidden" flat>
     <v-app-bar color="deep-purple accent-4" dark app>
       <v-app-bar-nav-icon></v-app-bar-nav-icon>
 
-      <v-toolbar-title>SISIDOX</v-toolbar-title>
+      <v-toolbar-title>Sisidox</v-toolbar-title>
 
       <v-spacer></v-spacer>
 
-      <v-btn icon>
-        <v-icon>mdi-heart</v-icon>
+      <v-btn icon to="/">
+        <v-icon>mdi-home</v-icon>
       </v-btn>
 
-      <v-btn icon>
-        <v-icon>mdi-magnify</v-icon>
-      </v-btn>
 
       <v-menu left bottom>
         <template v-slot:activator="{ on, attrs }">
@@ -49,14 +46,10 @@
             <GeneralAgenda></GeneralAgenda>
           </v-tab-item>
           <v-tab-item :value="'medical-records'">
-            <v-card flat>
-              <v-card-text>{{ text }}</v-card-text>
-            </v-card>
+            <MedicalRecords></MedicalRecords>
           </v-tab-item>
           <v-tab-item :value="'scheduled-appointments'">
-            <v-card flat>
-              <v-card-text>{{ text }}</v-card-text>
-            </v-card>
+            <ScheduledAppointments></ScheduledAppointments>
           </v-tab-item>
           <v-tab-item :value="'configurations'">
             <v-card flat>
@@ -74,20 +67,26 @@ import { Component, Vue } from "vue-property-decorator";
 import MenuItemsStore from "@/store/modules/menuItems";
 import { Menu, Role } from "@/store/models";
 import GeneralAgenda from "@/components/doctor/GeneralAgenda.vue";
+import ScheduledAppointments from "@/components/doctor/ScheduledAppointments.vue";
+import MedicalRecords from "@/components/doctor/MedicalRecords.vue";
 
 @Component({
   name: "Doctor",
   components:{
-    GeneralAgenda
+    GeneralAgenda,
+    ScheduledAppointments,
+    MedicalRecords
   }
 })
 export default class Doctor extends Vue {
+  title = "Sisidox | Panel de doctor";
   tab = null;
   items: Menu[] = [];
 
   text =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
   created(): void{
+    document.title = this.title;
     this.getMenuItems();
   }
   getMenuItems(): void{
