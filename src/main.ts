@@ -10,7 +10,7 @@ import AuthStore from "./store/modules/auth";
 import AppointmentsStore from "./store/modules/appointments";
 import firebaseConfig from "./environments"
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig[ process.env.NODE_ENV === "production" ? "production" : "development" ]);
+firebase.initializeApp(firebaseConfig[ process.env.NODE_ENV === "development" ?  "development" : "production"]);
 
 firebase.auth().onAuthStateChanged(async (user) => {
   try {
