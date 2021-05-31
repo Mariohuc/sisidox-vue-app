@@ -1,5 +1,6 @@
 <template>
-  <v-card class="overflow-hidden">
+  <v-card>
+    <h1>HOLA</h1>
     <v-app-bar color="deep-purple accent-4" dark app>
       <v-app-bar-nav-icon></v-app-bar-nav-icon>
 
@@ -32,13 +33,16 @@
         <v-tabs v-model="tab" centered center-active dark>
           <v-tabs-slider></v-tabs-slider>
 
-          <v-tab v-for="(item, index) in items" :key="index" :href="'#'+item.state">
+          <v-tab
+            v-for="(item, index) in items"
+            :key="index"
+            :href="'#' + item.state"
+          >
             <v-avatar tile size="36" class="mr-2">
               <img :src="item.imagePath" alt="" />
             </v-avatar>
             {{ item.name }}
           </v-tab>
-
         </v-tabs>
       </template>
     </v-app-bar>
@@ -77,9 +81,9 @@ import GeneralAgenda from "@/components/doctor/GeneralAgenda.vue";
 
 @Component({
   name: "Doctor",
-  components:{
-    GeneralAgenda
-  }
+  components: {
+    GeneralAgenda,
+  },
 })
 export default class Doctor extends Vue {
   tab = null;
@@ -87,13 +91,14 @@ export default class Doctor extends Vue {
 
   text =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
-  created(): void{
+  created(): void {
     this.getMenuItems();
   }
-  getMenuItems(): void{
-    MenuItemsStore.MENUITEMS.map(item => {
-      if(item.belongTo.find( rol => rol === Role.DOCTOR)) this.items.push(item);
-    })
+  getMenuItems(): void {
+    MenuItemsStore.MENUITEMS.map((item) => {
+      if (item.belongTo.find((rol) => rol === Role.DOCTOR))
+        this.items.push(item);
+    });
   }
 }
 </script>
