@@ -1,8 +1,10 @@
 <template>
-  <v-card class="overflow-hidden">
-    <v-app-bar color="light-green darken-4" dark app>
-      <v-app-bar-nav-icon></v-app-bar-nav-icon>
-
+  <v-card class="rounded-0 overflow-hidden" flat>
+    <v-app-bar color="#FFF2FE" app>
+      <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
+      <v-avatar size="40" tile class="mr-2">
+        <img src="/icono-sisidox.png" alt="Sisidox" class="ma-1" />
+      </v-avatar>
       <v-toolbar-title>SISIDOX</v-toolbar-title>
 
       <v-spacer></v-spacer>
@@ -25,7 +27,7 @@
         </v-list>
       </v-menu>
       <template v-slot:extension>
-        <v-tabs v-model="tab" centered center-active dark>
+        <v-tabs v-model="tab" centered center-active>
           <v-tabs-slider></v-tabs-slider>
 
           <v-tab v-for="(item, index) in items" :key="index" :href="'#'+item.state">
@@ -42,14 +44,10 @@
       <v-container>
         <v-tabs-items v-model="tab">
           <v-tab-item :value="'booked-appointments'">
-            <v-card flat>
-              <v-card-text>{{ text }}</v-card-text>
-            </v-card>
+            <BookedAppointments></BookedAppointments>
           </v-tab-item>
           <v-tab-item :value="'medical-record'">
-            <v-card flat>
-              <v-card-text>{{ text }}</v-card-text>
-            </v-card>
+            <MedicalRecordDetail></MedicalRecordDetail>
           </v-tab-item>
           <v-tab-item :value="'configurations'">
             <v-card flat>
@@ -66,9 +64,15 @@
 import { Component, Vue } from "vue-property-decorator";
 import MenuItemsStore from "@/store/modules/menuItems";
 import { Menu, Role } from "@/store/models";
+import BookedAppointments from "@/components/patient/BookedAppointments.vue";
+import MedicalRecordDetail from "@/components/patient/MedicalRecordDetail.vue";
 
 @Component({
-  name: "Patient"
+  name: "Patient",
+  components: {
+    BookedAppointments,
+    MedicalRecordDetail
+  }
 })
 export default class Patient extends Vue {
   title = "Sisidox | Panel de paciente";

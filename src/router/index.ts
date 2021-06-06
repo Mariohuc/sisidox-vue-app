@@ -2,6 +2,8 @@ import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 import Home from "../views/Home.vue";
 import AppointmentSearch from "../views/AppointmentSearch.vue";
+import { Menu, Role } from "@/store/models";
+import AuthStore from "@/store/modules/auth";
 
 Vue.use(VueRouter);
 
@@ -19,12 +21,18 @@ const routes: Array<RouteConfig> = [
   {
     path: "/doctor",
     name: "Doctor",
-    component:  () => import("../views/Doctor.vue")
+    component:  () => import("../views/Doctor.vue"),
+    meta: {
+      authUser: Role.DOCTOR
+    }
   },
   {
     path: "/patient",
     name: "Patient",
-    component: () => import("../views/Patient.vue")
+    component: () => import("../views/Patient.vue"),
+    meta: {
+      authUser: Role.PATIENT
+    }
   },
   {
     path: "/about",
@@ -39,6 +47,23 @@ const routes: Array<RouteConfig> = [
 
 const router = new VueRouter({
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  const found = to.matched.find(record => !!record.meta.authUser );
+
+  if (found) {
+    if (AuthStore.roles.some( item => item === found.meta.authUser )) {
+      next();
+    } else {
+      //alert('You must be logged in to see this page');
+      next({
+        path: '/',
+      });
+    }
+  } else {
+    next();
+  }
 });
 
 export default router;

@@ -20,7 +20,7 @@
     </v-card>
     <v-row class="fill-height mt-6">
       <v-col
-        v-for="(item, i) in patients"
+        v-for="(item, i) in doctors"
         :key="i"
         cols="12"
         sm="6"
@@ -37,7 +37,7 @@
             <v-row align="center" class="mx-0 my-0">
               <v-col cols="12">
                 <v-text-field
-                  label="Paciente"
+                  label="Doctor"
                   placeholder=""
                   v-model="item.name"
                   readonly
@@ -77,15 +77,15 @@
 import { Component, Vue } from "vue-property-decorator";
 
 @Component({
-  name: "ScheduledAppointments"
+  name: "BookedAppointments"
 })
-export default class ScheduledAppointments extends Vue {
+export default class BookedAppointments extends Vue {
   loading = false;
   selection = 1;
 
-  patients = [
+  doctors = [
     {
-      name: "JULIETA VENEGA",
+      name: "ORESTER VERA",
       date: "18 de mayo 2021 8:00 AM",
       lastModified: "15 de mayo 2021 8:00 AM",
       color: "amber accent-4"

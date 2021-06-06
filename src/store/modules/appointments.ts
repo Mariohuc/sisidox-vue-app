@@ -3,9 +3,14 @@ import {
   Module,
   Action,
   config,
-  getModule
+  getModule,
+  Mutation
 } from "vuex-module-decorators";
-import { AppointmentsRange } from "../models";
+import {
+  AppointmentsRange,
+  AppointmentTicket,
+  AppointmentTicketRange
+} from "../models";
 import store from "@/store";
 import firebase from "firebase";
 import { DateTime } from "luxon";
@@ -20,42 +25,97 @@ config.rawError = true;
   name: "appointmentsStore"
 })
 class AppointmentsStore extends VuexModule {
-  public appointmentsRange: AppointmentsRange[] = [];
+
+  public currentApptTicketsRange: AppointmentTicket[] = [];
   /* An @Action only can receive one argument */
+  @Mutation
+  SET_CURRENTAPPTTICKETSRANGE(val: AppointmentTicket[]) {
+    this.currentApptTicketsRange = val;
+  }
+
   @Action
-  async fetchAppointmentsByRange( range: { start: string | Date, end: string | Date }) {
-    const { start, end } = range;
+  async fetchApptTicketsByRange(range: {
+    start: string | Date;
+    end: string | Date;
+    doctorUID: string;
+  }) {
+    const { start, end, doctorUID } = range;
+
     const querySnapshot = await firebase
       .firestore()
-      .collection("appointments")
+      .collection("appointmentTickets")
+      .where("doctorId", "==", doctorUID)
       .where(
         "startTime",
         ">=",
         firebase.firestore.Timestamp.fromMillis(
-          DateTime.fromISO(`${start}T00:00:00`).setZone('utc').toMillis()
+          DateTime.fromISO(`${start}T00:00:00`).setZone("utc").toMillis()
         )
       )
       .where(
         "startTime",
         "<=",
         firebase.firestore.Timestamp.fromMillis(
-          DateTime.fromISO(`${end}T23:30:00`).setZone('utc').toMillis()
+          DateTime.fromISO(`${end}T23:30:00`).setZone("utc").toMillis()
         )
       )
       .get();
-
+    const apptTickets: AppointmentTicket[] = [];
     querySnapshot.forEach((doc) => {
       // doc.data() is never undefined for query doc snapshots
-      console.log(doc.id, " => ", doc.data());
-      const { startTime, endTime } = doc.data()
-      console.log( startTime.toDate(), endTime.toDate() )
+      const { startTime, endTime, cost, isFree, doctorId } = doc.data();
+
+      const record: AppointmentTicket = {
+        uid: doc.id,
+        name: isFree ? "GRATIS" : `DE PAGO (S./${cost.toFixed(2)})`,
+        start: DateTime.fromJSDate(startTime.toDate()).toFormat(
+          "yyyy-LL-dd HH:mm"
+        ),
+        end: DateTime.fromJSDate(endTime.toDate()).toFormat("yyyy-LL-dd HH:mm"),
+        color: isFree ? "green" : "blue",
+        cost,
+        isFree,
+        doctorId
+      };
+      apptTickets.push(record);
     });
+   
+    this.SET_CURRENTAPPTTICKETSRANGE(apptTickets);
   }
 
   @Action
-  emptyApptsRangeArray() {
-    this.appointmentsRange.length = 0;
+  async saveNewApptTickets(data: {
+    start: any;
+    end: any;
+    isFree: boolean;
+    cost: number;
+    doctorId: string;
+  }) {
+    const { start, end, isFree, cost, doctorId } = data;
+    const utcStart = start.setZone("utc");
+    const utcEnd = end.setZone("utc");
+
+    const diffInMinutes = utcEnd.diff(utcStart, "minutes");
+
+    const numTickets = diffInMinutes.toObject().minutes / 30;
+    const db = firebase.firestore();
+    const batch = db.batch();
+    for (let i = 0; i < numTickets; i++) {
+      batch.set(db.collection("appointmentTickets").doc(), {
+        startTime: firebase.firestore.Timestamp.fromMillis(
+          utcStart.plus({ minutes: i * 30 }).toMillis()
+        ),
+        endTime: firebase.firestore.Timestamp.fromMillis(
+          utcStart.plus({ minutes: i * 30 + 29 }).toMillis()
+        ),
+        cost,
+        isFree,
+        doctorId
+      });
+    }
+    await batch.commit();
   }
+
 }
 
 export default getModule(AppointmentsStore);

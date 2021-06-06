@@ -2,7 +2,7 @@
   <v-card class="mt-5" flat>
     <v-card class="d-flex flex-row mx-4 mt-2" flat tile>
       <v-text-field
-        value="JULIETA VENEGAS"
+        value="JULIO CACHAHUALLPA"
         label="Historial de"
         outlined
         readonly
@@ -93,11 +93,6 @@
       </v-expansion-panel>
     </v-expansion-panels>
 
-    <v-card class="d-flex flex-row-reverse mx-4 my-4" flat tile>
-      <v-btn @click="backToList()" color="secondary">
-        <v-icon dark class="mr-1"> mdi-arrow-left-circle </v-icon> Atrás
-      </v-btn>
-    </v-card>
   </v-card>
 </template>
 
@@ -121,9 +116,7 @@ export default class MedicalRecordDetail extends Vue {
     'Dermatitis',
     'Urticaria'
   ];
-  backToList(): void {
-    this.$emit("changeMode");
-  }
+ 
   removeDisease(index: number): void{
     this.diseases.splice(index, 1)
   }

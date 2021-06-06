@@ -15,7 +15,16 @@
         <div>
           <div class="d-flex align-content-center">
             <v-btn color="red" dark class="mx-auto" @click="signInWithGoogle">
-              <v-icon class="mr-2">mdi-google</v-icon>Iniciar sesión con Google
+              <v-icon class="mr-2">mdi-google</v-icon>Iniciar sesión con Google (Paciente)
+            </v-btn>
+          </div>
+        </div>
+      </v-card-text>
+      <v-card-text>
+        <div>
+          <div class="d-flex align-content-center">
+            <v-btn color="blue" dark class="mx-auto" @click="signInWithGoogleAsDoctor">
+              <v-icon class="mr-2">mdi-google</v-icon>Iniciar sesión con Google (Doctor)
             </v-btn>
           </div>
         </div>
@@ -33,6 +42,7 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 import AuthStore from "@/store/modules/auth";
+import { Role } from "@/store/models";
 
 @Component({
   name: "Login"
@@ -45,6 +55,14 @@ export default class Login extends Vue {
   async signInWithGoogle(): Promise<void> {
     try {
       await AuthStore.signInWithGoogle();
+      this.dialog = false;
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
+  async signInWithGoogleAsDoctor(): Promise<void> {
+    try {
+      await AuthStore.signInWithGoogle( Role.DOCTOR );
       this.dialog = false;
     } catch (error) {
       console.error(error.message);

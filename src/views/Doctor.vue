@@ -1,9 +1,11 @@
 <template>
-  <v-card class="overflow-hidden" flat>
-    <v-app-bar color="deep-purple accent-4" dark app>
-      <v-app-bar-nav-icon></v-app-bar-nav-icon>
-
-      <v-toolbar-title>Sisidox</v-toolbar-title>
+  <v-card class="rounded-0 overflow-hidden" flat>
+    <v-app-bar color="#FFF2FE" app>
+      <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
+      <v-avatar size="40" tile class="mr-2">
+        <img src="/icono-sisidox.png" alt="Sisidox" class="ma-1" />
+      </v-avatar>
+      <v-toolbar-title>SISIDOX</v-toolbar-title>
 
       <v-spacer></v-spacer>
 
@@ -26,7 +28,7 @@
         </v-list>
       </v-menu>
       <template v-slot:extension>
-        <v-tabs v-model="tab" centered center-active dark>
+        <v-tabs v-model="tab" centered center-active>
           <v-tabs-slider></v-tabs-slider>
 
           <v-tab v-for="(item, index) in items" :key="index" :href="'#'+item.state">
@@ -52,9 +54,7 @@
             <ScheduledAppointments></ScheduledAppointments>
           </v-tab-item>
           <v-tab-item :value="'configurations'">
-            <v-card flat>
-              <v-card-text>{{ text }}</v-card-text>
-            </v-card>
+            <DoctorConfig></DoctorConfig>
           </v-tab-item>
         </v-tabs-items>
       </v-container>
@@ -69,13 +69,15 @@ import { Menu, Role } from "@/store/models";
 import GeneralAgenda from "@/components/doctor/GeneralAgenda.vue";
 import ScheduledAppointments from "@/components/doctor/ScheduledAppointments.vue";
 import MedicalRecords from "@/components/doctor/MedicalRecords.vue";
+import DoctorConfig from "@/components/doctor/DoctorConfig.vue";
 
 @Component({
   name: "Doctor",
   components:{
     GeneralAgenda,
     ScheduledAppointments,
-    MedicalRecords
+    MedicalRecords,
+    DoctorConfig
   }
 })
 export default class Doctor extends Vue {

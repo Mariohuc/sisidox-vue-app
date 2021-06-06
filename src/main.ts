@@ -18,7 +18,6 @@ firebase.auth().onAuthStateChanged(async (user) => {
       await AuthStore.fetchUser(user);
     }else{
       AuthStore.resetState();
-      AppointmentsStore.emptyApptsRangeArray();
     }
   } catch (error) {
     console.error("There's problems fetching the user", error.message)

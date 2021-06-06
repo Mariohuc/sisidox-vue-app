@@ -1,5 +1,5 @@
 <template>
-  <v-card class="overflow-hidden">
+  <v-card class="rounded-0 overflow-hidden" flat>
     <v-app-bar color="deep-purple accent-4" dark app>
       <v-app-bar-nav-icon></v-app-bar-nav-icon>
 
@@ -26,7 +26,7 @@
       </v-menu>
     </v-app-bar>
     <v-main>
-      <v-card class="rounded-0 pa-2">
+      <v-card class="rounded-0 pa-4">
         <v-container>
           <v-row align="center" class="fill-height">
             <v-col class="d-flex" cols="12" sm="4">
@@ -65,7 +65,7 @@
               md="4"
               lg="3"
             >
-              <v-card :loading="item.loading" class="mx-auto my-2">
+              <v-card :loading="item.loading" class="mx-0 my-0">
                 <template slot="progress">
                   <v-progress-linear
                     color="deep-purple"

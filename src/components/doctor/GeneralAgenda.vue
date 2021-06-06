@@ -65,7 +65,7 @@
             <v-card color="grey lighten-4" flat>
               <v-toolbar :color="selectedEvent.color" dark>
                 <v-toolbar-title
-                  v-html="'Estado: ' + selectedEvent.name"
+                  v-html="'CITA: ' + selectedEvent.name"
                 ></v-toolbar-title>
                 <v-spacer></v-spacer>
               </v-toolbar>
@@ -74,7 +74,7 @@
                   <v-icon right dark class="mr-2">
                     mdi-clipboard-list-outline
                   </v-icon>
-                  Cita N° {{ selectedEvent.id }}
+                  Cita N° {{ selectedEvent.uid }}
                 </v-btn>
               </v-card-text>
               <v-divider class="my-0"></v-divider>
@@ -114,187 +114,206 @@
         >
       </v-col>
     </v-row>
-    <p class="text-h6 my-2">
-      <v-icon class="mr-1 mb-1"> mdi-table-plus </v-icon>
-      Agregar nuevas citas - especialidad:
-    </p>
-    <v-divider class="mb-4"></v-divider>
-    <v-form v-model="validAppt" ref="apptForm">
-      <v-row>
-        <v-col cols="12" sm="6">
+
+    <v-card v-if="isTheCurrentWeek">
+      <v-card-title>
+        <v-icon class="mr-1 mb-1"> mdi-table-plus </v-icon> Agregar nuevas citas
+        - especialidad:
+      </v-card-title>
+      <v-divider class="mb-4"></v-divider>
+      <v-card-text>
+        <v-form v-model="validAppt" ref="mainForm">
           <v-row>
+            <v-col cols="12" sm="6">
+              <v-row>
+                <v-col cols="12">
+                  <v-menu
+                    v-model="menu1"
+                    :close-on-content-click="false"
+                    :nudge-right="40"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="290px"
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        v-model="editAppt.start_d"
+                        label="Fecha de nueva(s) cita(s)"
+                        :rules="eaRules.start_d"
+                        prepend-icon="mdi-calendar"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="editAppt.start_d"
+                      @input="menu1 = false"
+                    ></v-date-picker>
+                  </v-menu>
+                </v-col>
+
+                <v-col cols="12" sm="4">
+                  <v-menu
+                    ref="menust"
+                    v-model="menu2"
+                    :close-on-content-click="false"
+                    :nudge-right="40"
+                    :return-value.sync="editAppt.start_t"
+                    transition="scale-transition"
+                    offset-y
+                    max-width="290px"
+                    min-width="290px"
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        v-model="editAppt.start_t"
+                        label="Desde (formato 24hrs)"
+                        prepend-icon="mdi-clock-time-four-outline"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-time-picker
+                      v-if="menu2"
+                      v-model="editAppt.start_t"
+                      full-width
+                      format="24hr"
+                      :allowed-minutes="allowed_minutes"
+                      :allowed-hours="allowed_hours"
+                      @click:minute="$refs.menust.save(editAppt.start_t)"
+                    ></v-time-picker>
+                  </v-menu>
+                </v-col>
+
+                <v-col cols="12" sm="4">
+                  <v-text-field
+                    type="number"
+                    v-model="editAppt.num_appts"
+                    :rules="eaRules.num_appts"
+                    prepend-icon="mdi-clipboard-list-outline"
+                    label="# citas según rango escogido"
+                    readonly
+                  ></v-text-field>
+                </v-col>
+
+                <v-col cols="12" sm="4">
+                  <v-menu
+                    ref="menuet"
+                    v-model="menu3"
+                    :close-on-content-click="false"
+                    :nudge-right="40"
+                    :return-value.sync="editAppt.end_t"
+                    transition="scale-transition"
+                    offset-y
+                    max-width="290px"
+                    min-width="290px"
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        v-model="editAppt.end_t"
+                        label="Hasta (formato 24hrs)"
+                        prepend-icon="mdi-clock-time-four-outline"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-time-picker
+                      v-if="menu3"
+                      v-model="editAppt.end_t"
+                      full-width
+                      format="24hr"
+                      :allowed-minutes="allowed_minutes"
+                      :allowed-hours="allowed_hours"
+                      @click:minute="$refs.menuet.save(editAppt.end_t)"
+                    ></v-time-picker>
+                  </v-menu>
+                </v-col>
+
+                <v-col cols="12">
+                  <v-subheader
+                    >Cada cita tienen una duración de 29 minutos por
+                    defecto.</v-subheader
+                  >
+                </v-col>
+              </v-row>
+            </v-col>
+
+            <v-col cols="12" sm="6">
+              <v-row>
+                <v-col cols="8">
+                  <v-text-field
+                    v-model="editAppt.cost"
+                    label="Costo (Soles)"
+                    :rules="eaRules.cost"
+                    prepend-icon="mdi-currency-usd-circle"
+                    :disabled="editAppt.isFree"
+                    @change="changeApptCost()"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-checkbox
+                    v-model="editAppt.isFree"
+                    label="Cita(s) gratuita(s)"
+                    @change="changeCheckBox1()"
+                  ></v-checkbox>
+                </v-col>
+                <v-col cols="12" md="12" lg="6">
+                  <v-btn
+                    block
+                    :disabled="!validAppt"
+                    @click="saveNewApptTickets"
+                    :loading="mainFormStatus === 1"
+                  >
+                    Añadir nuevo(s) turno(s)
+                  </v-btn>
+                </v-col>
+                <v-col cols="12" md="12" lg="6">
+                  <v-btn block color="error"> Cancelar </v-btn>
+                </v-col>
+              </v-row>
+            </v-col>
             <v-col cols="12">
-              <v-menu
-                v-model="menu1"
-                :close-on-content-click="false"
-                :nudge-right="40"
+              <v-alert
+                dense
+                border="left"
+                type="warning"
+                :key="err_componentKey"
+                dismissible
                 transition="scale-transition"
-                offset-y
-                min-width="290px"
+                :value="throwWarn"
               >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    v-model="editAppt.start_d"
-                    label="Fecha de nueva(s) cita(s)"
-                    :rules="eaRules.start_d"
-                    prepend-icon="mdi-calendar"
-                    readonly
-                    v-bind="attrs"
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  v-model="editAppt.start_d"
-                  @input="menu1 = false"
-                ></v-date-picker>
-              </v-menu>
-            </v-col>
-
-            <v-col cols="12" sm="4">
-              <v-menu
-                ref="menust"
-                v-model="menu2"
-                :close-on-content-click="false"
-                :nudge-right="40"
-                :return-value.sync="editAppt.start_t"
-                transition="scale-transition"
-                offset-y
-                max-width="290px"
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    v-model="editAppt.start_t"
-                    label="Desde (formato 24hrs)"
-                    prepend-icon="mdi-clock-time-four-outline"
-                    readonly
-                    v-bind="attrs"
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-time-picker
-                  v-if="menu2"
-                  v-model="editAppt.start_t"
-                  full-width
-                  format="24hr"
-                  :allowed-minutes="allowed_minutes"
-                  :allowed-hours="allowed_hours"
-                  @click:minute="$refs.menust.save(editAppt.start_t)"
-                ></v-time-picker>
-              </v-menu>
-            </v-col>
-
-            <v-col cols="12" sm="4">
-              <v-text-field
-                type="number"
-                v-model="editAppt.num_appts"
-                :rules="eaRules.num_appts"
-                prepend-icon="mdi-clipboard-list-outline"
-                label="# citas según rango escogido"
-                readonly
-              ></v-text-field>
-            </v-col>
-
-            <v-col cols="12" sm="4">
-              <v-menu
-                ref="menuet"
-                v-model="menu3"
-                :close-on-content-click="false"
-                :nudge-right="40"
-                :return-value.sync="editAppt.end_t"
-                transition="scale-transition"
-                offset-y
-                max-width="290px"
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    v-model="editAppt.end_t"
-                    label="Hasta (formato 24hrs)"
-                    prepend-icon="mdi-clock-time-four-outline"
-                    readonly
-                    v-bind="attrs"
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-time-picker
-                  v-if="menu3"
-                  v-model="editAppt.end_t"
-                  full-width
-                  format="24hr"
-                  :allowed-minutes="allowed_minutes"
-                  :allowed-hours="allowed_hours"
-                  @click:minute="$refs.menuet.save(editAppt.end_t)"
-                ></v-time-picker>
-              </v-menu>
-            </v-col>
-
-            <v-col cols="12">
-              <v-subheader
-                >Cada cita tienen una duración de 29 minutos por
-                defecto.</v-subheader
-              >
+                El rango escogido esta atrasado con respecto a
+                <strong>ahora</strong> o esta
+                <strong>superponiendose</strong> sobre otras citas del
+                calendario. El rango minimamente debe empezar en la hora
+                siguiente con relación a la hora actual.
+              </v-alert>
             </v-col>
           </v-row>
-        </v-col>
-
-        <v-col cols="12" sm="6">
-          <v-row>
-            <v-col cols="8">
-              <v-text-field
-                v-model="editAppt.cost"
-                label="Costo (Soles)"
-                :rules="eaRules.cost"
-                prepend-icon="mdi-currency-usd-circle"
-                :disabled="editAppt.is_free"
-                @change="changeApptCost()"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="4">
-              <v-checkbox
-                v-model="editAppt.is_free"
-                label="Cita(s) gratuita(s)"
-                @change="changeCheckBox1()"
-              ></v-checkbox>
-            </v-col>
-            <v-col cols="6">
-              <v-btn block :disabled="!validAppt" @click="saveAppointments">
-                Añadir cita(s)
-              </v-btn>
-            </v-col>
-            <v-col cols="6">
-              <v-btn block color="error"> Cancelar </v-btn>
-            </v-col>
-          </v-row>
-        </v-col>
-        <v-col cols="12">
-          <v-alert
-            v-if="throwWarn"
-            dense
-            border="left"
-            type="warning"
-            :key="err_componentKey"
-            dismissible
-          >
-            El rango escogido esta atrasado con respecto a
-            <strong>ahora</strong> o esta <strong>superponiendose</strong> sobre
-            otras citas del calendario. El rango minimamente debe empezar en la
-            hora siguiente con relación a la hora actual.
-          </v-alert>
-        </v-col>
-      </v-row>
-    </v-form>
+        </v-form>
+      </v-card-text>
+    </v-card>
   </v-card>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Watch } from "vue-property-decorator";
 import AppointmentsStore from "@/store/modules/appointments";
+import AuthStore from "@/store/modules/auth";
+import { DateTime, Interval } from "luxon";
+import { AppointmentTicket } from "@/store/models";
 
 interface VCalendar extends Vue {
   checkChange(): void;
   prev(): void;
   next(): void;
+}
+
+interface VForm extends Vue {
+  resetValidation(): void;
 }
 
 @Component({
@@ -303,7 +322,9 @@ interface VCalendar extends Vue {
 export default class GeneralAgenda extends Vue {
   $refs!: {
     calendar: VCalendar;
+    mainForm: VForm;
   };
+  mainFormStatus = 0;
   focus = "";
   calendarType = "week";
   typeToLabel = {
@@ -314,25 +335,25 @@ export default class GeneralAgenda extends Vue {
   selectedElement = null;
   selectedOpen = false;
   validAppt = false;
-  events = [];
+  events: AppointmentTicket[] = [];
   menu1 = false;
   menu2 = false;
   menu3 = false;
   num_appts = 1;
   editAppt = {
-    start_d: "2021-05-03",
+    start_d: "",
     start_t: "",
     num_appts: -1,
     end_t: "",
-    is_free: false,
+    isFree: false,
     cost: 20
   };
   defaultAppt = {
-    start_d: "2021-05-03",
+    start_d: DateTime.now().toFormat("yyyy-LL-dd"),
     start_t: "",
     num_appts: -1,
     end_t: "",
-    is_free: false,
+    isFree: false,
     cost: 20
   };
   eaRules = {
@@ -349,7 +370,7 @@ export default class GeneralAgenda extends Vue {
   componentKey = 0;
   throwWarn = false;
   err_componentKey = 0;
-
+  isTheCurrentWeek = false;
   get allowed_minutes(): number[] {
     return [0, 30];
   }
@@ -363,11 +384,38 @@ export default class GeneralAgenda extends Vue {
 
   @Watch("editAppt.start_t")
   editAppt_start_tChanged(val: any): void {
-    console.log("Changed", val);
+    if (!this.editAppt.end_t) {
+      return;
+    }
+    let start = DateTime.fromISO(val);
+    let end = DateTime.fromISO(this.editAppt.end_t);
+    if (start < end) {
+      let diffInMinutes = end.diff(start, "minutes");
+      this.editAppt.num_appts = diffInMinutes.toObject().minutes / 30;
+      return;
+    }
+    this.editAppt.num_appts = -1;
+  }
+
+  @Watch("editAppt.end_t")
+  editAppt_end_tChanged(val: any): void {
+    if (!this.editAppt.start_t) {
+      return;
+    }
+    let start = DateTime.fromISO(this.editAppt.start_t);
+    let end = DateTime.fromISO(val);
+    if (end > start) {
+      let diffInMinutes = end.diff(start, "minutes");
+
+      this.editAppt.num_appts = diffInMinutes.toObject().minutes / 30;
+      return;
+    }
+    this.editAppt.num_appts = -1;
   }
 
   mounted(): void {
     this.$refs.calendar.checkChange();
+    this.editAppt = Object.assign({}, this.defaultAppt);
   }
   viewDay({ date }: any): void {
     this.focus = date;
@@ -406,28 +454,82 @@ export default class GeneralAgenda extends Vue {
   async updateRange({ start, end }: any): Promise<void> {
     //console.log("Change", start, end);
     try {
-      await AppointmentsStore.fetchAppointmentsByRange({ start: start.date, end: end.date });
+      /* Check if it'is the current week so the add tickets form is shown */
+      const startL = DateTime.fromISO(start.date);
+      const endL = DateTime.fromISO(end.date);
+      if (startL <= DateTime.now() && endL >= DateTime.now()) {
+        this.isTheCurrentWeek = true;
+      } else {
+        this.isTheCurrentWeek = false;
+      }
+      /* Fetch all tickets from firebase */
+      await AppointmentsStore.fetchApptTicketsByRange({
+        start: start.date,
+        end: end.date,
+        doctorUID: AuthStore.uid
+      });
+      this.events = AppointmentsStore.currentApptTicketsRange;
+      //this.componentKey += 1; // TO RE-RENDER THE V-CALENDAR
     } catch (error) {
       console.log("Error getting documents: ", error);
     }
   }
-  saveAppointments() {
-    console.log("Saving", "Saved");
+  async saveNewApptTickets(): Promise<void> {
+    try { 
+      this.throwWarn = false;
+      const start = DateTime.fromISO( this.editAppt.start_d + "T" + this.editAppt.start_t );
+      const end = DateTime.fromISO( this.editAppt.start_d + "T" + this.editAppt.end_t );
+      /* Check if some event overlap the new interval */
+      if( this.checkIfNewTicketsAreInvalid( start, end ) ){
+        setTimeout( () => this.throwWarn = true, 100 )
+        return;
+      }
+      this.mainFormStatus = 1;
+      const DATA = {
+        start,
+        end,
+        cost: this.editAppt.cost,
+        isFree: this.editAppt.isFree,
+        doctorId: AuthStore.uid
+      };
+      await AppointmentsStore.saveNewApptTickets(DATA);
+      this.editAppt = Object.assign({}, this.defaultAppt);
+      this.throwWarn = false;
+      this.$refs.mainForm.resetValidation();
+      this.mainFormStatus = 2;
+      this.componentKey += 1
+    } catch (error) {
+      this.mainFormStatus = 3;
+    }
   }
   deleteAppointment(apptId: any) {
     console.log("Deleting", apptId);
   }
   changeApptCost(): void {
     if (this.editAppt.cost < 1) {
-      this.editAppt.is_free = true;
+      this.editAppt.isFree = true;
     }
   }
   changeCheckBox1(): void {
-    if (this.editAppt.is_free) {
+    if (this.editAppt.isFree) {
       this.editAppt.cost = 0.0;
     } else {
       this.editAppt.cost = this.defaultAppt.cost;
     }
+  }
+  checkIfNewTicketsAreInvalid(newLStart: any, newLEnd: any) {
+    if( newLStart < DateTime.now().plus({ hours: 2 }) ){ // 1. It's less than the current time plus 2 hours
+      return true;
+    }
+    const newInterval = Interval.fromDateTimes(newLStart, newLEnd);
+    for (let i = 0; i < this.events.length; i++) {
+      let currentInt = Interval.fromDateTimes(
+        DateTime.fromFormat(this.events[i].start, "yyyy-LL-dd HH:mm"),
+        DateTime.fromFormat(this.events[i].end, "yyyy-LL-dd HH:mm")
+      );
+      if( newInterval.overlaps(currentInt) ) return true; // 2. intervals overlap
+    }
+    return false
   }
 }
 </script>

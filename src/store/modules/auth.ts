@@ -98,7 +98,7 @@ class AuthStore extends VuexModule implements User {
   }
 
   @Action
-  async signInWithGoogle() {
+  async signInWithGoogle(userRol : Role = Role.PATIENT) {
     const provider = new firebase.auth.GoogleAuthProvider();
     const result = await firebase.auth().signInWithPopup(provider);
     const dataUser = result.user;
@@ -117,22 +117,22 @@ class AuthStore extends VuexModule implements User {
         displayName: dataUser.displayName,
         photoURL: dataUser.photoURL,
         phoneNumber: dataUser.phoneNumber,
-        roles: [Role.PATIENT],
+        roles: [userRol],
         disabled: false
       };
       user = <User> data;
     } else {
+      const userdoc = doc.data();
       data = {
         displayName: dataUser.displayName,
         photoURL: dataUser.photoURL,
-        phoneNumber: dataUser.phoneNumber
+        phoneNumber: dataUser.phoneNumber,
+        roles: ( userdoc?.roles.some( (rol: Role) => rol === userRol) ) ? userdoc?.roles : [...userdoc?.roles, userRol],
       };
-      const userdoc = doc.data();
       user = {
         ...data,
         uid: userdoc?.uid,
-        email: userdoc?.email,
-        roles: userdoc?.roles,
+        email: userdoc?.email,     
         disabled: userdoc?.disabled
       } as User; //merge data
     }

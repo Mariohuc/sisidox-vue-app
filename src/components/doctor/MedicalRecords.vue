@@ -1,12 +1,12 @@
 <template>
-  <v-card class="mt-5" flat>
+  <div class="my-2">
     <v-card v-if="mode === 'LIST'">
-      <v-row class="fill-height">
+      <v-row class="fill-height mx-1">
         <v-col v-for="(item, i) in patients" :key="i" cols="12" sm="6" md="4">
           <v-card
             color="primary"
             dark
-            class="d-flex flex-row align-center mx-auto my-2"
+            class="d-flex flex-row align-center mx-0 my-0"
           >
             <v-text-field
               label="Paciente"
@@ -17,15 +17,25 @@
               class="mx-3 my-3"
             ></v-text-field>
 
-            <v-btn color="pink" class="mx-3 my-3" @click="watchDetail()" fab small dark>
+            <v-btn
+              color="pink"
+              class="mx-3 my-3"
+              @click="watchDetail()"
+              fab
+              small
+              dark
+            >
               <v-icon>mdi-file-account</v-icon>
             </v-btn>
           </v-card>
         </v-col>
       </v-row>
     </v-card>
-    <MedicalRecordDetail v-if="mode === 'HISTORY'" v-on:changeMode="modeList()"></MedicalRecordDetail>
-  </v-card>
+    <MedicalRecordDetail
+      v-if="mode === 'HISTORY'"
+      v-on:changeMode="modeList()"
+    ></MedicalRecordDetail>
+  </div>
 </template>
 
 <script lang="ts">
@@ -34,15 +44,14 @@ import MedicalRecordDetail from "./MedicalRecordDetail.vue";
 
 @Component({
   name: "MedicalRecords",
-  components:{
+  components: {
     MedicalRecordDetail
   }
 })
 export default class MedicalRecords extends Vue {
   loading = false;
-  selection = 1;
-  mode = '';
-  modes = ['LIST', 'HISTORY']
+  mode = "";
+  modes = ["LIST", "HISTORY"];
   patients = [
     {
       name: "JULIETA VENEGA",
@@ -70,14 +79,14 @@ export default class MedicalRecords extends Vue {
       lastModified: "15 de mayo 2021 9:00 AM"
     }
   ];
-  created():void{
-    this.modeList()
+  created(): void {
+    this.modeList();
   }
-  watchDetail(): void{
-    this.mode = this.modes[1]
+  watchDetail(): void {
+    this.mode = this.modes[1];
   }
-  modeList(): void{
-    this.mode = this.modes[0]
+  modeList(): void {
+    this.mode = this.modes[0];
   }
   reserve() {
     this.loading = true;
