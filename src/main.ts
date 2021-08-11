@@ -4,11 +4,12 @@ import "./registerServiceWorker";
 import router from "./router";
 import store from "./store";
 import vuetify from "./plugins/vuetify";
+import VueYouTubeEmbed from 'vue-youtube-embed';
 
 import firebase from "firebase";
 import AuthStore from "./store/modules/auth";
-import AppointmentsStore from "./store/modules/appointments";
-import firebaseConfig from "./environments"
+//import AppointmentsStore from "./store/modules/appointments";
+import firebaseConfig from "./environments";
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig[ process.env.NODE_ENV === "development" ?  "development" : "production"]);
 
@@ -25,6 +26,7 @@ firebase.auth().onAuthStateChanged(async (user) => {
     
 });
 
+Vue.use(VueYouTubeEmbed);
 Vue.config.productionTip = false;
 
 new Vue({

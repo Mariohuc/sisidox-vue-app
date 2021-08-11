@@ -65,72 +65,98 @@
               md="4"
               lg="3"
             >
-              <v-card :loading="item.loading" class="mx-0 my-0">
-                <template slot="progress">
-                  <v-progress-linear
-                    color="deep-purple"
-                    height="10"
-                    indeterminate
-                  ></v-progress-linear>
-                </template>
+              <v-hover v-slot:default="{ hover }">
+                <v-card
+                  :loading="item.loading"
+                  class="card-2"
+                  :elevation="hover ? 10 : 4"
+                  :class="{ 'up-2': hover }"
+                >
+                  <div class="flex-center">
+                    <template slot="progress">
+                      <v-progress-linear
+                        color="deep-purple"
+                        height="10"
+                        indeterminate
+                      ></v-progress-linear>
+                    </template>
 
-                <v-card-text class="text-center p-0">
-                  <v-avatar size="200">
-                  <img
-                    :src="item.photoUrl"
-                    alt="John"
-                  />
-                </v-avatar>
-                </v-card-text>
-                
-                <v-card-title style="display: block" class="text-truncate">{{ item.name }}</v-card-title>
+                    <v-card-text class="text-center p-0">
+                      <v-avatar size="200">
+                        <img :src="item.photoUrl" alt="John" />
+                      </v-avatar>
+                    </v-card-text>
 
-                <v-card-text>
-                  <v-row align="center" class="mx-0">
-                    <v-rating
-                      :value="4.5"
-                      color="amber"
-                      dense
-                      half-increments
-                      readonly
-                      size="14"
-                    ></v-rating>
-
-                    <div class="grey--text ml-4">4.5 (413)</div>
-                  </v-row>
-                </v-card-text>
-
-                <v-divider class="mx-4"></v-divider>
-
-                <v-card-text>
-                  <v-chip-group v-model="selection" column>
-                    <v-chip color="indigo" text-color="white">
-                      <v-avatar left> <v-icon>mdi-doctor</v-icon> </v-avatar
-                      >PEDIATRIA</v-chip
+                    <v-card-title
+                      style="display: block"
+                      class="text-truncate text-subtitle-1"
+                      >{{ item.name }}</v-card-title
                     >
 
-                    <v-chip color="orange" text-color="white">
-                      <v-avatar left>
-                        <v-icon>mdi-cash</v-icon>
-                      </v-avatar>
-                      S/. {{ item.price.toFixed(2) }}
-                    </v-chip>
+                    <v-card-text>
+                      <v-row align="center" class="mx-0">
+                        <v-rating
+                          :value="4.5"
+                          color="amber"
+                          dense
+                          half-increments
+                          readonly
+                          size="14"
+                        ></v-rating>
 
-                    <v-chip color="green" text-color="white">
-                      <v-avatar left>
-                        <v-icon dark>mdi-identifier</v-icon>
-                      </v-avatar>
-                      {{ item.cmp }}
-                    </v-chip>
-                  </v-chip-group>
-                </v-card-text>
+                        <div class="grey--text ml-4">4.5 (413)</div>
+                      </v-row>
+                    </v-card-text>
 
-                <v-card-actions>
-                  <v-btn color="deep-purple lighten-2" text @click="reserve(i)">
-                    Citas disponibles
-                  </v-btn>
-                </v-card-actions>
-              </v-card>
+                    <v-divider class="mx-4"></v-divider>
+
+                    <v-card-text>
+                      <v-chip-group v-model="selection" column>
+                        <v-chip
+                          color="indigo"
+                          text-color="white"
+                          class="text-caption"
+                        >
+                          <v-avatar left> <v-icon>mdi-doctor</v-icon> </v-avatar
+                          >PEDIATRIA</v-chip
+                        >
+
+                        <v-chip
+                          color="orange"
+                          text-color="white"
+                          class="text-caption"
+                        >
+                          <v-avatar left>
+                            <v-icon>mdi-cash</v-icon>
+                          </v-avatar>
+                          S/. {{ item.price.toFixed(2) }}
+                        </v-chip>
+
+                        <v-chip
+                          color="green"
+                          text-color="white"
+                          class="text-caption"
+                        >
+                          <v-avatar left>
+                            <v-icon dark>mdi-identifier</v-icon>
+                          </v-avatar>
+                          {{ item.cmp }}
+                        </v-chip>
+                      </v-chip-group>
+                    </v-card-text>
+
+                    <v-card-actions>
+                      <v-btn
+                        color="deep-purple lighten-2"
+                        text
+                        @click="reserve(i)"
+                      >
+                        Citas disponibles
+                      </v-btn>
+                    </v-card-actions>
+                  </div>
+                </v-card>
+              </v-hover>
             </v-col>
           </v-row>
         </v-card>
@@ -152,7 +178,7 @@ import ScheduledAppointments from "@/components/doctor/ScheduledAppointments.vue
   }
 })
 export default class AppointmentSearch extends Vue {
-  title = 'Sisidox | Busca tu cita';
+  title = "Sisidox | Busca tu cita";
   loading = false;
   selection = 1;
   items = ["PEDIATRIA", "DERMATOLOGIA", "CARDIOLOGIA", "MEDICINA GENERAL"];
@@ -193,7 +219,7 @@ export default class AppointmentSearch extends Vue {
       loading: false
     }
   ];
-  created(): void{
+  created(): void {
     document.title = this.title;
   }
   reserve(index: number): void {

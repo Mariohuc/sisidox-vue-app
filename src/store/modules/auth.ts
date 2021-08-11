@@ -9,6 +9,8 @@ import {
 import { User, Role } from "../models";
 import store from "@/store";
 import firebase from "firebase";
+import HTTP from "@/http";
+import { DateTime } from "luxon";
 
 config.rawError = true;
 
@@ -20,6 +22,8 @@ config.rawError = true;
   name: "authStore"
 })
 class AuthStore extends VuexModule implements User {
+  public token = "";
+
   public uid = "";
   public email = "";
   public displayName = "";
@@ -28,7 +32,12 @@ class AuthStore extends VuexModule implements User {
   public roles: string[] = [];
   public disabled = false;
 
+  public currentUserMode: Role = Role.GUEST;
   //vuex-module-decorators allow Automatic getter detection
+  @Mutation
+  SET_TOKEN(token: string) {
+    this.token = token;
+  }
   @Mutation
   SET_UID(uid: string) {
     this.uid = uid;
@@ -58,8 +67,14 @@ class AuthStore extends VuexModule implements User {
     this.disabled = disabled;
   }
 
+  @Mutation
+  SET_CURRENT_USER_MODE(role: Role) {
+    this.currentUserMode = role;
+  }
+
   @Action
   resetState() {
+    this.SET_TOKEN("");
     this.SET_UID("");
     this.SET_EMAIL("");
     this.SET_DISPLAYNAME("");
@@ -78,22 +93,31 @@ class AuthStore extends VuexModule implements User {
     this.SET_ROLES(userData.roles);
     this.SET_DISABLED(userData.disabled);
   }
+  @Action
+  loadUser(userData: any) {
+    this.SET_UID(userData.id);
+    this.SET_EMAIL(userData.email);
+    this.SET_DISPLAYNAME(userData.displayName);
+    this.SET_PHONENUMBER(userData.phoneNumber);
+    this.SET_PHOTOURL(userData.photoURL);
+    const roles: Role[] = [];
+    if( userData.isAdmin === 1 || userData.isAdmin === true ) roles.push(Role.ADMINISTRATOR);
+    if( userData.isDoctor === 1 || userData.isDoctor === true ) roles.push(Role.DOCTOR);
+    if( userData.isPatient === 1 || userData.isPatient === true ) roles.push(Role.PATIENT);
+
+    this.SET_ROLES(roles); 
+    this.SET_DISABLED(userData.recordStatus === 'A' ? false : true);
+  }
 
   @Action
   async fetchUser(user: firebase.User) {
-    const docRef = firebase.firestore().collection("users").doc(user.uid);
-
-    const doc = await docRef.get();
-    if (doc.exists) {
-      const userdoc = doc.data();
-      if (!userdoc) throw new Error("User from FIRESTORE was returned as null");
-      this.SET_UID(userdoc.uid);
-      this.SET_EMAIL(userdoc.email);
-      this.SET_DISPLAYNAME(userdoc.displayName);
-      this.SET_PHONENUMBER(userdoc.phoneNumber);
-      this.SET_PHOTOURL(userdoc.photoURL);
-      this.SET_ROLES(userdoc.roles);
-      this.SET_DISABLED(userdoc.disabled);
+    const token = await user.getIdToken();
+    this.SET_TOKEN(token);
+    const result: any = await HTTP().get('/users/' + user.uid );
+    const _user: any = result.data.data;
+    if (_user) {
+      this.loadUser(_user)
+      this.getRouteByPriorityRole()
     }
   }
 
@@ -104,49 +128,70 @@ class AuthStore extends VuexModule implements User {
     const dataUser = result.user;
 
     if (!dataUser) throw new Error("User from firebase was returned as null");
-
-    const docRef = firebase.firestore().collection("users").doc(dataUser.uid);
-
-    const doc = await docRef.get();
-    let data = null,
-      user = null;
-    if (!doc.exists) {
-      data = {
-        uid: dataUser.uid,
+    const token = await dataUser.getIdToken();
+    this.SET_TOKEN(token);
+    const result02: any = await HTTP().get('/users/' + dataUser.uid );
+    const _user: any = result02.data.data;
+    let dataToSave: any = null;
+    if (!_user) {
+      dataToSave = {
+        id: dataUser.uid,
         email: dataUser.email,
         displayName: dataUser.displayName,
         photoURL: dataUser.photoURL,
         phoneNumber: dataUser.phoneNumber,
-        roles: [userRol],
-        disabled: false
-      };
-      user = <User> data;
-    } else {
-      const userdoc = doc.data();
-      data = {
+        emailVerified: dataUser.emailVerified,
+        isAdmin: userRol === Role.ADMINISTRATOR ? true : false,
+        isDoctor: userRol === Role.DOCTOR ? true : false,
+        isPatient: userRol === Role.PATIENT ? true : false,
+        recordStatus: 'A'
+      }
+      await this.saveUserData(dataToSave)
+    } else {      
+      dataToSave = {
+        id: _user.id,
         displayName: dataUser.displayName,
         photoURL: dataUser.photoURL,
         phoneNumber: dataUser.phoneNumber,
-        roles: ( userdoc?.roles.some( (rol: Role) => rol === userRol) ) ? userdoc?.roles : [...userdoc?.roles, userRol],
-      };
-      user = {
-        ...data,
-        uid: userdoc?.uid,
-        email: userdoc?.email,     
-        disabled: userdoc?.disabled
-      } as User; //merge data
+      }
+      switch(userRol){
+        case Role.ADMINISTRATOR: if(_user.isAdmin !== 1) dataToSave.isAdmin = true; break;
+        case Role.DOCTOR: if(_user.isDoctor !== 1) dataToSave.isDoctor = true; break;
+        default: if(_user.isPatient !== 1) dataToSave.isPatient = true; break;
+      }
+      await this.updateUserData(dataToSave);
+
+      dataToSave = Object.assign({}, _user, dataToSave );
     }
-    await firebase
-      .firestore()
-      .collection("users")
-      .doc(dataUser.uid)
-      .set(data, { merge: true });
-    this.setState(user);
+    
+    this.loadUser(dataToSave);
+    this.getRouteByPriorityRole()
   }
 
   @Action
   async logout() {
     await firebase.auth().signOut();
+  }
+
+  @Action
+  async saveUserData(userData: any){
+    await HTTP().post('/users', userData );
+  }
+  @Action
+  async updateUserData(userData: any){
+    await HTTP().patch('/users', userData );
+  }
+
+  @Action
+  getRouteByPriorityRole(): void {
+    if( this.roles.some(item => item === Role.ADMINISTRATOR) ){
+      this.SET_CURRENT_USER_MODE(Role.ADMINISTRATOR)
+    }else if( this.roles.some(item => item === Role.DOCTOR) ){
+      this.SET_CURRENT_USER_MODE(Role.DOCTOR)
+    }else if( this.roles.some(item => item === Role.PATIENT) ){
+      this.SET_CURRENT_USER_MODE(Role.PATIENT)
+    };
+
   }
 }
 

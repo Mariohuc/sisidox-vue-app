@@ -4,15 +4,15 @@
       <v-card-text>
         <v-row justify="center">
         <v-chip class="ma-2">
-          <v-avatar size="36" left class="amber accent-4"> </v-avatar>
+          <v-avatar size="36" left :color="SCHEDULED_STATUS.color"> </v-avatar>
           Programadas
         </v-chip>
         <v-chip class="ma-2">
-          <v-avatar size="36" left class="green accent-4"> </v-avatar>
+          <v-avatar size="36" left :color="ONGOING_STATUS.color"> </v-avatar>
           En curso
         </v-chip>
         <v-chip class="ma-2">
-          <v-avatar size="36" left class="red accent-4"> </v-avatar>
+          <v-avatar size="36" left :color="FINISHED_STATUS.color"> </v-avatar>
           Finalizadas
         </v-chip>
       </v-row>
@@ -39,7 +39,7 @@
                 <v-text-field
                   label="Paciente"
                   placeholder=""
-                  v-model="item.name"
+                  v-model="item.patientName"
                   readonly
                   filled
                   hide-details
@@ -49,7 +49,7 @@
                 <v-text-field
                   label="Fecha"
                   placeholder=""
-                  v-model="item.date"
+                  v-model="item.startTime"
                   readonly
                   filled
                   hide-details
@@ -59,7 +59,7 @@
                 <v-text-field
                   label="Ultima modificación"
                   placeholder=""
-                  v-model="item.lastModified"
+                  v-model="item.updatedAt"
                   readonly
                   filled
                   hide-details
@@ -75,6 +75,11 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import BasicReportsStore from "@/store/modules/basicReports";
+import AuthStore from "@/store/modules/auth";
+import AppointmentsStore from "@/store/modules/appointments"
+import { AppStatus } from "@/store/models";
+import { DateTime } from "luxon"
 
 @Component({
   name: "ScheduledAppointments"
@@ -82,44 +87,43 @@ import { Component, Vue } from "vue-property-decorator";
 export default class ScheduledAppointments extends Vue {
   loading = false;
   selection = 1;
+  SCHEDULED_STATUS: AppStatus = AppointmentsStore.SCHEDULED_STATUS;
+  ONGOING_STATUS: AppStatus = AppointmentsStore.ONGOING_STATUS;
+  FINISHED_STATUS: AppStatus = AppointmentsStore.FINISHED_STATUS;
 
-  patients = [
-    {
-      name: "JULIETA VENEGA",
-      date: "18 de mayo 2021 8:00 AM",
-      lastModified: "15 de mayo 2021 8:00 AM",
-      color: "amber accent-4"
-    },
-    {
-      name: "FRANCISCO TORRES",
-      date: "18 de mayo 2021 8:00 AM",
-      lastModified: "16 de mayo 2021 8:00 AM",
-      color: "amber accent-4"
-    },
-    {
-      name: "RAUL ROMERO",
-      date: "18 de mayo 2021 8:00 AM",
-      lastModified: "16 de mayo 2021 8:00 AM",
-      color: "red accent-4"
-    },
-    {
-      name: "EDUARDO GUTIERREZ GAMES",
-      date: "18 de mayo 2021 8:00 AM",
-      lastModified: "16 de mayo 2021 8:00 AM",
-      color: "red accent-4"
-    },
-    {
-      name: "RODOLFO ELRENO",
-      date: "18 de mayo 2021 8:00 AM",
-      lastModified: "15 de mayo 2021 9:00 AM",
-      color: "green accent-4"
-    }
-  ];
+  patients: any[] = [];
 
+  created(): void {
+    this.getDoctorAppointments()
+  }
   reserve() {
     this.loading = true;
 
     setTimeout(() => (this.loading = false), 2000);
+  }
+
+  async getDoctorAppointments(): Promise<void> {
+    const docApp: any[] = await BasicReportsStore.getDoctorAppointments({
+      page: 1,
+      limit: 500,
+      doctorId: AuthStore.uid,
+      recordStatus: 'A'
+    })
+    
+    this.patients = this.formatBackendBookedAppointments(docApp);
+  }
+
+  formatBackendBookedAppointments( backendData: any [] ){
+    backendData.forEach(item => {
+      item.startTime = DateTime.fromISO(item.startTime).setLocale('es').toFormat(`dd LLLL yyyy',' hh:mm a`);
+      item.updatedAt = DateTime.fromISO(item.updatedAt).setLocale('es').toFormat(`dd LLLL yyyy',' hh:mm a`);
+      switch( item.apptStatus ){
+        case this.SCHEDULED_STATUS.label: item.color = this.SCHEDULED_STATUS.color; break;
+        case this.ONGOING_STATUS.label: item.color = this.ONGOING_STATUS.color; break;
+        case this.FINISHED_STATUS.label: item.color = this.FINISHED_STATUS.color; break;
+      }
+    })
+    return backendData;
   }
 }
 </script>

@@ -9,23 +9,8 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn icon to="/">
-        <v-icon>mdi-home</v-icon>
-      </v-btn>
-
-      <v-menu left bottom>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn icon v-bind="attrs" v-on="on">
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-        </template>
-
-        <v-list>
-          <v-list-item v-for="n in 5" :key="n" @click="() => {}">
-            <v-list-item-title>Option {{ n }}</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
+      <HorizontalAppbarMenu></HorizontalAppbarMenu>
+      
       <template v-slot:extension>
         <v-tabs v-model="tab" centered center-active>
           <v-tabs-slider></v-tabs-slider>
@@ -66,12 +51,14 @@ import MenuItemsStore from "@/store/modules/menuItems";
 import { Menu, Role } from "@/store/models";
 import BookedAppointments from "@/components/patient/BookedAppointments.vue";
 import MedicalRecordDetail from "@/components/patient/MedicalRecordDetail.vue";
+import HorizontalAppbarMenu from "@/components/HorizontalAppbarMenu.vue";
 
 @Component({
   name: "Patient",
   components: {
     BookedAppointments,
-    MedicalRecordDetail
+    MedicalRecordDetail,
+    HorizontalAppbarMenu
   }
 })
 export default class Patient extends Vue {

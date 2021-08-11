@@ -455,11 +455,11 @@ export default class GeneralAgenda extends Vue {
     //console.log("Change", start, end);
     try {
       /* Check if it'is the current week so the add tickets form is shown */
-      const startL = DateTime.fromISO(start.date);
-      const endL = DateTime.fromISO(end.date);
-      if (startL <= DateTime.now() && endL >= DateTime.now()) {
+      const endL = DateTime.fromISO(end.date).endOf('day');
+      if ( endL >= DateTime.now()) {
         this.isTheCurrentWeek = true;
       } else {
+        console.log('Out of range')
         this.isTheCurrentWeek = false;
       }
       /* Fetch all tickets from firebase */

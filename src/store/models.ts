@@ -68,21 +68,28 @@ export interface AppointmentsRange {
 }
 
 export interface DoctorData {
-  uid?: string;
-  fullnameOfDr: string;
+  doctorId: string;
+  fullname: string;
   specialty: string;
   cmpNumber: string;
   appointmentCost: number;
   formalPhotoUrl?: string;
   personalDescription: string;
-  disabled: boolean;
+  createdAt: string;
+  updatedAt?: string;
+  recordStatus: string;
 }
 
 export interface DictionaryWord {
-  uid?: string;
+  id?: string;
+  codeword: string;
   name: string;
   description: string;
   type: WordType;
-  metadata?: any;
-  disabled: boolean;
+  recordStatus: string;
+}
+
+export interface AppStatus {
+  label: string,
+  color: string
 }

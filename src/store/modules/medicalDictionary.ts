@@ -9,7 +9,8 @@ import {
 import store from "@/store";
 import firebase from "firebase";
 import { DictionaryWord, WordType } from "../models";
-
+//import HTTP from "@/http";
+import PUBLIC_HTTP from '@/public-http';
 config.rawError = true;
 
 //type Nullable<T> = T | undefined | null;
@@ -28,31 +29,13 @@ class MedicalDictionaryStore extends VuexModule {
   }
 
   @Action
-  async fetchWordsBy(data: {
-    type: WordType.SPECIALTY
-  }) {
-    const { type } = data;
-    const querySnapshot = await firebase
-      .firestore()
-      .collection("medicalDictionary")
-      .where("type", "==", type)
-      .get();
+  async fetchWordsBy(data: { type: WordType.SPECIALTY, recordStatus: string }) {
+    const { type, recordStatus } = data;
+    const queryParams = `?type=${type}&recordStatus=${recordStatus}`;
+    const result = await PUBLIC_HTTP().get("/medical-dictionary" + queryParams);
+    const querySnapshot = result.data.data as DictionaryWord[];
     
-      const words: DictionaryWord[] = [];
-      querySnapshot.forEach((doc) => {
-        // doc.data() is never undefined for query doc snapshots
-        const { name, description, type, metadata, disabled } = doc.data();
-        const record: DictionaryWord = {
-          uid: doc.id,
-          name,
-          description,
-          type,
-          metadata,
-          disabled
-        };
-        words.push(record);
-      });  
-      this.SET_CURRENTWORDS(words);
+    this.SET_CURRENTWORDS(querySnapshot);
   }
 }
 
