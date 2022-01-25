@@ -4,7 +4,7 @@ export interface User {
   displayName: string;
   phoneNumber: string;
   photoURL: string;
-  roles: string[]; // Only can take one of the follow values: 'PATIENT', 'DOCTOR', 'ADMINISTRATOR'
+  roles: Role[]; // Only can take one of the follow values: 'PATIENT', 'DOCTOR', 'ADMINISTRATOR'
   disabled: boolean;
 }
 
@@ -44,15 +44,18 @@ export interface Appointment {
 }
 
 export interface AppointmentTicket {
-  uid: string;
-  name: string;
-  start: string;
-  end: string;
+  id: number;
+  name?: string;
+  start?: string;
+  end?: string;
+  startTime: any;
+  endTime: any;
   cost: number;
-  color: string;
+  color?: string;
   verificationCode?: string;
   isFree: boolean;
   doctorId: string;
+  recordStatus?: string;
 }
 
 export interface AppointmentTicketRange {
@@ -72,12 +75,26 @@ export interface DoctorData {
   fullname: string;
   specialty: string;
   cmpNumber: string;
+  gender: string;
   appointmentCost: number;
   formalPhotoUrl?: string;
   personalDescription: string;
   createdAt: string;
   updatedAt?: string;
   recordStatus: string;
+}
+export interface DoctorSum {
+  appointmentCost: number
+  cmpNumber: string
+  doctorId: string
+  doctorRating: number
+  fullname: string
+  gender: string
+  mpAccessToken: string
+  numberOfReviews: number
+  photoUrl: string
+  specialty: string
+  specialtyName: string
 }
 
 export interface DictionaryWord {
@@ -90,6 +107,68 @@ export interface DictionaryWord {
 }
 
 export interface AppStatus {
-  label: string,
+  label: string;
+  color: string;
+}
+
+export interface Pagination {
+  page: number;
+  per_page: number;
+  pre_page: number | null;
+  next_page: number | null;
+  total: number;
+  total_pages: number;
+  data: any[];
+}
+
+export interface DoctorCreationTicket {
+  createdAt: string
+  documentNumber: string
+  documentType: string
+  id: string
+  recordStatus: string
+}
+
+export interface BookedAppointment {
+  id: string
+  patientId: string
+  doctorId: string
+  startTime: string
+  endTime: string
+  previousPatientComments: string
+  doctorConclusions: string
+  medicationSupplied: string
+  mpPaymentId: string
+  mpPaymentStatus: string
+  createdAt: string
+  updatedAt: string
+  apptStatus: string
+  recordStatus: string
+}
+
+export interface SnackBarParams{
+  snackbar: boolean
+  timeout?: number
   color: string
+  text: string
+}
+
+export interface AlertParams{
+  visible: boolean
+  type: string
+  icon?: string
+  text: string
+}
+
+export interface CardFormData {
+  amount: string,
+  cardholderEmail: string
+  identificationNumber: string
+  identificationType: string
+  installments: string
+  issuerId: string
+  merchantAccountId: string
+  paymentMethodId: string
+  processingMode: string
+  token: string
 }

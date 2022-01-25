@@ -4,27 +4,32 @@
       <v-row align="center" justify="center">
         <v-col cols="10">
           <v-row justify="center">
-            <v-col cols="12" sm="5">
-              <h1 class="font-weight-light display-1">Contate-nos</h1>
-              <h3 class="font-weight-light mt-3">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste
-                explicabo commodi quisquam asperiores dolore ad enim provident
-                veniam perferendis voluptate, perspiciatis.
-              </h3>
-              <h3 class="font-weight-light mt-3">
-                Lorem ipsum dolor sit amet consectetur adipisicing.
-              </h3>
-              <h3 class="font-weight-light mt-3">
-                Telefone: +xx (xx) xxxxx-xxxx
-              </h3>
-              <h3 class="font-weight-light">Email: email@email.com</h3>
+            <v-col cols="12" md="5">
+              <h1 class="font-weight-light display-1">Contactenos</h1>
+              
+              <h4 class="font-weight-light mt-3">
+                Teléfono: +51 964 810 483
+              </h4>
+              <h4 class="font-weight-light">Email: sisidox.sac@gmail.com</h4>
+              <v-divider class="my-6"></v-divider>
+              <div>
+                <div class="footer-links">
+                  <h4>Enlaces útiles</h4>
+                  <ul>
+                    <li><span class="mdi mdi-chevron-right"></span> <a href="#">Acerca de nosotros</a></li>
+                    <li><span class="mdi mdi-chevron-right"></span> <a href="#">Términos y condiciones</a></li>
+                    <li><span class="mdi mdi-chevron-right"></span> <a href="#">Politicas de privacidad</a></li>
+                  </ul>
+              </div>
+                
+              </div>
             </v-col>
-            <v-col cols="12" sm="7">
+            <v-col cols="12" md="7">
               <v-form ref="form" v-model="valid" :lazy-validation="lazy">
                 <v-text-field
                   v-model="name"
                   :rules="nameRules"
-                  label="Nome"
+                  label="Nombre"
                   required
                 ></v-text-field>
 
@@ -38,7 +43,7 @@
                 <v-textarea
                   v-model="textArea"
                   :rules="textAreaRules"
-                  label="Mensagem"
+                  label="Mensaje"
                   required
                 />
 
@@ -80,6 +85,53 @@
 </template>
 
 <style scoped>
+.footer-links h4 {
+  font-size: 16px;
+  font-weight: bold;
+  color: #444444;
+  position: relative;
+  padding-bottom: 12px;
+}
+
+.footer-links {
+  margin-bottom: 30px;
+}
+
+.footer-links ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links ul i {
+  padding-right: 2px;
+  color: #1c84e3;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.footer-links ul li {
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+}
+
+.footer-links ul li:first-child {
+  padding-top: 0;
+}
+
+.footer-links ul a {
+  color: #777777;
+  transition: 0.3s;
+  display: inline-block;
+  line-height: 1;
+}
+
+.footer-links ul a:hover {
+  text-decoration: none;
+  color: #5bc8ac;
+}
+
 #contact {
   background-color: #f4f7f5;
 }
@@ -106,18 +158,18 @@ export default class ContactSection extends Vue {
   valid = true;
   name = "";
   nameRules = [
-    (v: any) => !!v || "O campo nome é obrigatório",
+    (v: any) => !!v || "El nombre es requerido",
     (v: any) =>
-      (v && v.length >= 6) || "O nome precisa ter mais de 6 caracteres",
+      (v && v.length >= 6) || "El nombre debe tener más de 6 caracteres",
   ];
   email = "";
   emailRules = [
-    (v: any) => !!v || "O campo email é obrigatório",
-    (v: any) => /.+@.+\..+/.test(v) || "O E-mail precisa ser válido",
+    (v: any) => !!v || "El email es requerido",
+    (v: any) => /.+@.+\..+/.test(v) || "El email debe ser válido",
   ];
   textArea = "";
   textAreaRules = [
-    (v: any) => !!v || "O campo de texto é obrigatório",
+    (v: any) => !!v || "El mensaje es requerido",
     (v: any) => (v && v.length >= 10) || "Mínimo de 10 caracteres",
   ];
   lazy = false;
@@ -126,5 +178,16 @@ export default class ContactSection extends Vue {
     text: "",
     color: "",
   };
+  links = ['Términos y condiciones','Politicas de privacidad']
+  isXs = false;
+
+  onResize(): void {
+    this.isXs = window.innerWidth < 850;
+  }
+
+  mounted(): void {
+    this.onResize();
+    window.addEventListener("resize", this.onResize, { passive: true });
+  }
 }
 </script>

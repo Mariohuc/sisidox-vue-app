@@ -65,7 +65,7 @@
             <v-card color="grey lighten-4" flat>
               <v-toolbar :color="selectedEvent.color" dark>
                 <v-toolbar-title
-                  v-html="'CITA: ' + selectedEvent.name"
+                  v-html="( typeof selectedEvent.id == 'string' ? 'CITA: ' : 'TICKET: ') + selectedEvent.name"
                 ></v-toolbar-title>
                 <v-spacer></v-spacer>
               </v-toolbar>
@@ -97,20 +97,14 @@
         </v-sheet>
       </v-col>
       <v-col cols="12" class="text-center">
-        <v-chip class="ma-2" chip color="#fc6a03" text-color="white"
-          >Libres</v-chip
+        <v-chip class="ma-2">
+          <v-avatar size="36" left color="green"></v-avatar>Ticket gratuito
+        </v-chip>
+        <v-chip class="ma-2"
+          ><v-avatar size="36" left color="blue"></v-avatar>Ticket de pago</v-chip
         >
-        <v-chip class="ma-2" chip color="rgb(229,190,1)" text-color="white"
-          >Programadas</v-chip
-        >
-        <v-chip class="ma-2" chip color="green" text-color="white"
-          >En Curso</v-chip
-        >
-        <v-chip class="ma-2" chip color="#d50000" text-color="white"
-          >Finalizadas</v-chip
-        >
-        <v-chip class="ma-2" chip color="#9c9c9c" text-color="white"
-          >Liquidadas</v-chip
+        <v-chip class="ma-2"
+          ><v-avatar size="36" left color="grey"></v-avatar>Cita reservada</v-chip
         >
       </v-col>
     </v-row>
@@ -463,12 +457,13 @@ export default class GeneralAgenda extends Vue {
         this.isTheCurrentWeek = false;
       }
       /* Fetch all tickets from firebase */
-      await AppointmentsStore.fetchApptTicketsByRange({
+      const result: any[] = await AppointmentsStore.fetchAllTicketsAndAppointment({
         start: start.date,
         end: end.date,
-        doctorUID: AuthStore.uid
+        doctorUID: AuthStore.uid,
+        recordStatus: 'A'
       });
-      this.events = AppointmentsStore.currentApptTicketsRange;
+      this.events = result;
       //this.componentKey += 1; // TO RE-RENDER THE V-CALENDAR
     } catch (error) {
       console.log("Error getting documents: ", error);
@@ -518,7 +513,7 @@ export default class GeneralAgenda extends Vue {
     }
   }
   checkIfNewTicketsAreInvalid(newLStart: any, newLEnd: any) {
-    if( newLStart < DateTime.now().plus({ hours: 2 }) ){ // 1. It's less than the current time plus 2 hours
+    if( newLStart < DateTime.now().plus({ hours: 1 }) ){ // 1. It's less than the current time plus 2 hours
       return true;
     }
     const newInterval = Interval.fromDateTimes(newLStart, newLEnd);

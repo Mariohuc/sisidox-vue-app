@@ -3,32 +3,31 @@
     <v-container fluid>
       <v-row align="center" justify="center">
         <v-col cols="10">
-          <v-card style="width: 100%">
-            <h1 class="text-center pt-6 font-weight-light display-2">Reserva tu cita</h1>
-            <v-divider class="mt-6"></v-divider>
+          <v-card color="transparent" style="width: 100%" flat>
+            <h1 class="text-center pt-6 font-weight-light display-2">
+              Reserva tu cita
+            </h1>
+            
             <v-card-text>
-              <v-row class="text-center">
-              <v-col v-for="spec in specialties" :key="spec.id" class="col-12 col-sm-6 col-md-4 col-lg-3">
-                <v-hover v-slot:default="{ hover }">
-                  <v-card class="card-2" :elevation="hover ? 10 : 4" :class="{ 'up-2': hover }">
-                    <div class="flex-center">
-                      <v-card-text>
-                        <div class="flex-center">
-                          <div class="circle1">
-                            <div class="circle2">
-                              <v-img src="~@/assets/img/paperplane.svg" :class="{ 'zoom-efect': hover }"></v-img>
-                            </div>
-                          </div>
-                        </div>
-                        <div style="display: block" class="text--disabled text-truncate text-uppercase text-h6 my-2">
-                          {{ spec.name }}
-                        </div>
-                      </v-card-text>
-                    </div>
-                  </v-card>
-                </v-hover>
-              </v-col>
-            </v-row>
+              <v-list subheader two-line>
+                <v-row class="d-flex justify-center my-3">
+                  <v-col
+                    v-for="spec in specialties"
+                    :key="spec.id"
+                    class="col-12 col-sm-5 py-0 d-flex justify-space-around"
+                  >
+                    <v-chip class="ma-2" color="indigo darken-3" large outlined style="width: 100%;" @click="goForBooking(spec)">
+                      <span
+                          class="medical-icon-i-health-services mx-2"
+                          aria-hidden="true"
+                          style="font-size: 2em;"
+                        ></span> 
+                      <span style="display: block;" class="text-truncate">{{ spec.name }}</span>
+                    </v-chip>
+                    
+                  </v-col>
+                </v-row>
+              </v-list>
             </v-card-text>
           </v-card>
         </v-col>
@@ -59,7 +58,7 @@
   </section>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 $main_color: #283e79;
 
 ul {
@@ -106,7 +105,6 @@ ul {
   transform: translateY(-15px);
   transition: 0.5s ease-out;
 }
-
 </style>
 
 <style scoped>
@@ -171,19 +169,23 @@ section {
 import { Component, Vue } from "vue-property-decorator";
 import MedicalDictionaryStore from "@/store/modules/medicalDictionary";
 import { DictionaryWord, WordType } from "@/store/models";
+import DoctorSearchFiltersStore from "@/store/modules/doctorSearchFilters";
 
 @Component({
   name: "PricingSection"
 })
 export default class PricingSection extends Vue {
   specialties: DictionaryWord[] = [];
-  
+
   async mounted(): Promise<void> {
     try {
-      await MedicalDictionaryStore.fetchWordsBy({ type: WordType.SPECIALTY, recordStatus: 'A' });
-      this.specialties = MedicalDictionaryStore.currentWords
-    } catch (error) {
-      console.error(error.message)
+      await MedicalDictionaryStore.fetchWordsBy({
+        type: WordType.SPECIALTY,
+        recordStatus: "A"
+      });
+      this.specialties = MedicalDictionaryStore.currentWords;
+    } catch (error: any) {
+      console.error(error.message);
     }
   }
 
@@ -196,6 +198,11 @@ export default class PricingSection extends Vue {
       xl: "x-large"
     }[this.$vuetify.breakpoint.name];
     return size ? { [size]: true } : {};
+  }
+
+  goForBooking(item: DictionaryWord){
+    DoctorSearchFiltersStore.SET_SPECIALTY(item)
+    this.$router.push({ path: '/appointment-search' });
   }
 }
 </script>

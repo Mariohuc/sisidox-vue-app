@@ -19,12 +19,12 @@
                         <div class="flex-center">
                           <div class="circle1">
                             <v-fab-transition>
-                              <v-btn color="gray" fab dark absolute top right>
+                              <v-btn :disabled="!DoctorExists" color="gray" fab dark absolute top right @click.stop="avatarDialog = true">
                                 <v-icon>mdi-pencil</v-icon>
                               </v-btn>
                             </v-fab-transition>
                             <div class="circle2">
-                              <v-img src="/img/generic/doctor-default.png" :class="{ 'zoom-efect': hover }"></v-img>
+                              <v-img class="avatar" :src="FormalPhotoUrl" :class="{ 'zoom-efect': hover }"></v-img>
                             </div>
                           </div>
                         </div>
@@ -34,14 +34,47 @@
                   </v-card>
                 </v-hover>
 
+                <v-dialog
+                  v-model="avatarDialog"
+                  max-width="700"
+                  persistent
+                >
+                  <v-toolbar dark color="blue">
+                    <v-icon class="mr-2">mdi-camera</v-icon>
+                    <v-toolbar-title>Actualización de foto de perfil</v-toolbar-title>
+                    <v-spacer></v-spacer>
+                    <v-btn icon @click="avatarDialog = false">
+                      <v-icon>mdi-close</v-icon>
+                    </v-btn>
+
+                  </v-toolbar>
+                  <DoctorAvatarEditor @photoSubmittedEvent="avatarDialog = false" />
+                </v-dialog>
+
               </v-col>
-              <v-col cols="12" md="8">
+              <v-col cols="12" md="2">
+                <v-select
+                  v-model="gender"
+                  :rules="[(v) => v.code !== '' || 'Es requerido']"
+                  label="Prefíjo"
+                  :items="genders"
+                  item-text="name"
+                  item-value="code"
+                  persistent-hint
+                  return-object
+                  @change="genderOnChange()"
+                  :readonly="DoctorExists || readingModeFlag"
+                  required
+                ></v-select>
+              </v-col>
+              <v-col cols="12" md="6">
                 <v-text-field
                   v-model="doctorData.fullname"
                   :counter="50"
                   :rules="[(v) => !!v || 'Debes introducir tu nombre completo']"
                   label="Nombre completo"
                   required
+                  :readonly="readingModeFlag"
                 ></v-text-field>
               </v-col>
 
@@ -57,6 +90,7 @@
                   persistent-hint
                   return-object
                   required
+                  :readonly="readingModeFlag"
                 ></v-select>
               </v-col>
               <v-col cols="12" md="4">
@@ -65,30 +99,42 @@
                   label="Indica tu CMP"
                   :rules="[(v) => !!v || 'Debes indicar tu CMP']"
                   required
+                  :readonly="readingModeFlag"
                 ></v-text-field>
               </v-col>
               <v-col cols="12" md="4">
                 <v-text-field
                   type="number"
+                  :rules="[(v) => v > 0 && v < 99 || 'Cantidad inválida' ]"
                   v-model="doctorData.appointmentCost"
                   label="Indica tu precio por una consulta"
                   required
+                  :readonly="readingModeFlag"
                 ></v-text-field>
               </v-col>
               <v-col cols="12">
                 <v-textarea
                   filled
-                  label="Comentanos algo de ti"
+                  label="Escribe una pequeña introducción personal"
                   auto-grow
                   v-model="doctorData.personalDescription"
                   :counter="200"
+                  :readonly="readingModeFlag"
                 ></v-textarea>
               </v-col>
             </v-row>
             <v-row class="d-flex justify-center mb-6">
               <v-col cols="12" sm="2">
-                <v-btn :disabled="!valid || formDDstatus === 2" :loading="formDDstatus === 1" color="success" class="mr-4" @click="saveOrUpdateDoctorData()">
+                <v-btn v-if="readingModeFlag" color="primary" class="mr-4" @click="readingModeFlag = false">
+                  Editar
+                </v-btn>
+                <v-btn v-if="!readingModeFlag" :disabled="!valid || formDDstatus === 2" :loading="formDDstatus === 1" color="success" class="mr-4" @click="saveOrUpdateDoctorData()">
                   Guardar
+                </v-btn>               
+              </v-col>
+              <v-col v-if="!readingModeFlag" cols="12" sm="2">
+                <v-btn color="error" class="mr-4" @click="readingModeFlag = true">
+                  Cancelar
                 </v-btn>
               </v-col>
             </v-row>
@@ -114,26 +160,32 @@
 </template>
 
 <script lang="ts">
-import { DoctorData } from "@/store/models";
+import { DoctorData, DictionaryWord, WordType } from "@/store/models";
 import { Component, Vue, Watch } from "vue-property-decorator";
 import MedicalDictionaryStore from "@/store/modules/medicalDictionary";
 import DoctorDataStore from "@/store/modules/doctorData";
 import AuthStore from "@/store/modules/auth";
-import { DictionaryWord, WordType } from "@/store/models";
-import { DateTime } from "luxon";
+
+import DoctorAvatarEditor from "@/components/doctor/DoctorAvatarEditor.vue";
 
 @Component({
-  name: "DoctorConfig"
+  name: "DoctorConfig",
+  components: {
+    DoctorAvatarEditor
+  }
 })
 export default class DoctorConfig extends Vue {
   valid = true;
   specialties: DictionaryWord[] = [];
   specialty = { codeword: "", name: "" }
+  gender = { name: "", code: "" }
+  genders = [ { name: 'Dr.', code: 'M' }, { name: 'Dra.', code: 'F' } ]
   doctorData : DoctorData = {
     doctorId: AuthStore.uid,
     fullname: "",
     specialty: "",
     cmpNumber: "",
+    gender: "",
     appointmentCost: 0,
     formalPhotoUrl: "",
     personalDescription: "",
@@ -144,6 +196,8 @@ export default class DoctorConfig extends Vue {
   formDDMsg = "";
   formDDstatus = 0;
 
+  avatarDialog = false
+  readingModeFlag = false
   get snackbarDD(){
     return this.formDDMsg !== ""
   }
@@ -171,12 +225,16 @@ export default class DoctorConfig extends Vue {
       await DoctorDataStore.saveOrUpdateDoctorData(this.doctorData)
        this.formDDstatus = 2;
        this.formDDMsg = "Bien hecho!";
+       this.readingModeFlag = true;
     } catch (error) {
       this.formDDstatus = 3;
       this.formDDMsg = "Upps, error! Intentalo más tarde"
     }finally{
       setTimeout(()=> this.formDDMsg = "", 2000)
     }
+  }
+  genderOnChange(): void {
+    this.doctorData.gender = this.gender.code
   }
 
   async getDoctorData(): Promise<void> {
@@ -189,17 +247,46 @@ export default class DoctorConfig extends Vue {
         this.specialty.codeword = temp.codeword;
         this.specialty.name = temp.name;
       }
+      /* Setting gender selector */
+      const temp2 = this.genders.find( item => item.code === this.doctorData.gender );
+      if(temp2){
+        this.gender = temp2
+      }
+      this.readingModeFlag = true
     }
       
+  }
+  get DoctorExists(): boolean {
+    return DoctorDataStore.doctorExists
+  }
+  get FormalPhotoUrl(): string {
+    return DoctorDataStore.doctorData.formalPhotoUrl || "/img/generic/doctor-default.png"
   }
 }
 </script>
 
 <style scoped>
+.card-2 {
+  transition: 0.5s ease-out;
+}
+
+.card-2 .v-image {
+  transition: 0.75s;
+}
+
+.card-2 h1 {
+  margin-bottom: 10px;
+}
+
+.up-2 {
+  transform: translateY(-15px);
+  transition: 0.5s ease-out;
+}
+
 .circle1 {
   border-radius: 50%;
-  width: 250px;
-  height: 250px;
+  width: 200px;
+  height: 200px;
   background-color: #f0f8ff;
   display: flex;
   align-items: center;
@@ -208,18 +295,45 @@ export default class DoctorConfig extends Vue {
 
 .circle2 {
   border-radius: 50%;
-  width: 220px;
-  height: 220px;
+  width: 150px;
+  height: 150px;
   background-color: #e0effc;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
 }
 
 .flex-center {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.svg-border-rounded svg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  color: #f4f7f5;
+  z-index: -1;
+}
+
+#pricing {
+  z-index: 0;
+}
+
+.content {
+  z-index: 1;
+}
+
+svg {
+  overflow: hidden;
+}
+
+section {
+  position: relative;
+}
+.avatar {
+  border-radius: 50%;
 }
 </style>

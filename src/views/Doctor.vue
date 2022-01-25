@@ -1,6 +1,6 @@
 <template>
   <v-card class="rounded-0 overflow-hidden" flat>
-    <v-app-bar color="#FFF2FE" app>
+    <v-app-bar color="purple" dark app>
       <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
       <v-avatar size="40" tile class="mr-2">
         <img src="/icono-sisidox.png" alt="Sisidox" class="ma-1" />
@@ -45,8 +45,16 @@
         </v-tabs-items>
       </v-container>
     </v-main>
+
+    <GeneralFooter color="purple" />
   </v-card>
 </template>
+
+<style scoped>
+.footer {
+  width: 100%;
+}
+</style>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
@@ -57,6 +65,7 @@ import ScheduledAppointments from "@/components/doctor/ScheduledAppointments.vue
 import MedicalRecords from "@/components/doctor/MedicalRecords.vue";
 import DoctorConfig from "@/components/doctor/DoctorConfig.vue";
 import HorizontalAppbarMenu from "@/components/HorizontalAppbarMenu.vue"
+import GeneralFooter from "@/components/general/GeneralFooter.vue";
 
 @Component({
   name: "Doctor",
@@ -65,7 +74,8 @@ import HorizontalAppbarMenu from "@/components/HorizontalAppbarMenu.vue"
     ScheduledAppointments,
     MedicalRecords,
     DoctorConfig,
-    HorizontalAppbarMenu
+    HorizontalAppbarMenu,
+    GeneralFooter
   }
 })
 export default class Doctor extends Vue {
@@ -87,5 +97,3 @@ export default class Doctor extends Vue {
   }
 }
 </script>
-
-<style></style>

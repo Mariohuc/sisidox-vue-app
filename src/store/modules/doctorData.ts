@@ -12,7 +12,6 @@ import HTTP from "@/http";
 
 config.rawError = true;
 
-//type Nullable<T> = T | undefined | null;
 
 @Module({
   dynamic: true,
@@ -25,6 +24,7 @@ class DoctorDataStore extends VuexModule {
     fullname: "",
     specialty: "",
     cmpNumber: "",
+    gender: "",
     appointmentCost: 0,
     formalPhotoUrl: "",
     personalDescription: "",
@@ -35,43 +35,57 @@ class DoctorDataStore extends VuexModule {
   public doctorExists = false;
 
   @Action
-  async saveOrUpdateDoctorData(doctor: DoctorData) {
+  async saveOrUpdateDoctorData(doctor: DoctorData): Promise<void> {
     if( this.doctorExists ){
-      await HTTP().patch('/doctor-data', doctor);
+      await HTTP().patch('/doctor-data/' + doctor.doctorId, doctor);
     }else{
       await HTTP().post('/doctor-data', doctor);
     }
-    this.SET_DOCTOREXISTS(true);
+    //this.SET_DOCTOREXISTS(true);
   }
 
   @Action
-  async getDoctorData(doctorId: string) {
+  async getDoctorData(doctorId: string): Promise<void>  {
     const { data } = await HTTP().get('/doctor-data/' + doctorId);
     const doctorData = data.data as DoctorData;
     if (doctorData) {
       this.SET_DOCTORDATA(doctorData);
       this.SET_DOCTOREXISTS(true);
+      this.getDoctorPhotoUrl(doctorId)
     }else{
       this.SET_DOCTOREXISTS(false);
     }
   }
 
+  @Action
+  async getDoctorPhotoUrl(doctorId: string): Promise<void> {
+    const { data } = await HTTP().get('/doctor-data/' + doctorId + '/photo-url');
+    const result: { doctorId: string, photoUrl: string } = data.data;
+    if( result ){
+      this.SET_FORMAL_PHOTO_URL(result.photoUrl || "")
+    }
+  }
+
   @Mutation
-  SET_DOCTORDATA(doctorData: DoctorData) {
+  SET_DOCTORDATA(doctorData: DoctorData): void {
     this.doctorData.doctorId = doctorData.doctorId;
     this.doctorData.fullname = doctorData.fullname;
     this.doctorData.specialty = doctorData.specialty;
     this.doctorData.cmpNumber = doctorData.cmpNumber;
+    this.doctorData.gender = doctorData.gender;
     this.doctorData.appointmentCost = doctorData.appointmentCost;
-    //this.doctorData.formalPhotoUrl = doctorData.formalPhotoUrl;
     this.doctorData.personalDescription = doctorData.personalDescription;
     this.doctorData.createdAt = doctorData.createdAt;
     this.doctorData.updatedAt = doctorData.updatedAt;
     this.doctorData.recordStatus = doctorData.recordStatus;
   }
+  @Mutation
+  SET_FORMAL_PHOTO_URL(photoUrl: string): void{
+    this.doctorData.formalPhotoUrl = photoUrl;
+  }
 
   @Mutation
-  SET_DOCTOREXISTS(val: boolean){
+  SET_DOCTOREXISTS(val: boolean): void{
     this.doctorExists = val;
   }
 }

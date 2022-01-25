@@ -2,7 +2,13 @@ import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 import Home from "../views/Home.vue";
 import AppointmentSearch from "../views/AppointmentSearch.vue";
-import { Menu, Role } from "@/store/models";
+import Admin from "../views/Admin.vue";
+import RegisterDoctor from "@/views/RegisterDoctor.vue"
+import RegisterAdmin from "@/views/RegisterAdmin.vue"
+import AppointmentVideoCall from "@/views/AppointmentVideoCall.vue";
+import AdminDashboard from "@/components/admin/AdminDashboard.vue"
+import AccessCreation from "@/components/admin/AccessCreation.vue"
+import { Role } from "@/store/models";
 import AuthStore from "@/store/modules/auth";
 
 Vue.use(VueRouter);
@@ -16,14 +22,17 @@ const routes: Array<RouteConfig> = [
   {
     path: '/appointment-search',
     name: "AppointmentSearch",
-    component: AppointmentSearch
+    component: AppointmentSearch,
+    meta: {
+      roles: [ Role.PATIENT, Role.DOCTOR ]
+    }
   },
   {
     path: "/doctor",
     name: "Doctor",
     component:  () => import("../views/Doctor.vue"),
     meta: {
-      authUser: Role.DOCTOR
+      roles: [ Role.DOCTOR ]
     }
   },
   {
@@ -31,8 +40,42 @@ const routes: Array<RouteConfig> = [
     name: "Patient",
     component: () => import("../views/Patient.vue"),
     meta: {
-      authUser: Role.PATIENT
+      roles: [ Role.PATIENT ]
     }
+  },
+  {
+    path: "/admin",
+    name: "Admin",
+    component: Admin,
+    meta: {
+      roles: [ Role.ADMINISTRATOR ]
+    },
+    children: [
+      {
+        path: "",
+        redirect: "dashboard"
+      },
+      {
+        path: "dashboard",
+        component: AdminDashboard
+      },
+      {
+        path: "access-creation",
+        component: AccessCreation
+      }
+    ]
+  },
+  {
+    path: "/register-doctor/:dcTicketId",
+    component: RegisterDoctor
+  },
+  {
+    path: "/register-admin/:acTicketId",
+    component: RegisterAdmin
+  },
+  {
+    path: "/appointment-video-call/:bookedApptId",
+    component: AppointmentVideoCall
   },
   {
     path: "/about",
@@ -50,16 +93,14 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const found = to.matched.find(record => !!record.meta.authUser );
-
+  const found: any = to.matched.find(record => !!record.meta.roles );
   if (found) {
-    if (AuthStore.roles.some( item => item === found.meta.authUser )) {
+    const requiredRoles: Array<Role> = found.meta.roles;
+    if (AuthStore.roles.some( item => requiredRoles.includes(item) )) {
       next();
     } else {
       //alert('You must be logged in to see this page');
-      next({
-        path: '/',
-      });
+      next({ path: '/' })
     }
   } else {
     next();

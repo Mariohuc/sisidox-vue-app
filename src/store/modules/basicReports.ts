@@ -39,6 +39,7 @@ class BasicReportsStore extends VuexModule {
     limit?: number;
     patientId?: string;
     doctor?: string;
+    apptStatus?: string;
     recordStatus?: string;
   }) {
     const { data }: any = await HTTP().get('/patient-appointments', { params: params })
@@ -55,6 +56,17 @@ class BasicReportsStore extends VuexModule {
     recordStatus?: string;
   }) {
     const { data }: any = await HTTP().get('/doctors-summary', { params: params })
+    return data.data;
+  }
+
+  @Action
+  async getDoctorPatients(params: {
+    page?: number;
+    limit?: number;
+    doctorId?: string;
+    recordStatus?: string;
+  }) {
+    const { data }: any = await HTTP().get('/doctor-patients', { params: params })
     return data.data;
   }
 }

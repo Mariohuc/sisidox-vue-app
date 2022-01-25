@@ -29,42 +29,47 @@ class AuthStore extends VuexModule implements User {
   public displayName = "";
   public phoneNumber = "";
   public photoURL = "";
-  public roles: string[] = [];
+  public roles: Role[] = [];
   public disabled = false;
 
   public currentUserMode: Role = Role.GUEST;
+  public fetchUserFlag = true
   //vuex-module-decorators allow Automatic getter detection
   @Mutation
-  SET_TOKEN(token: string) {
+  SET_TOKEN(token: string): void {
     this.token = token;
   }
   @Mutation
-  SET_UID(uid: string) {
+  SET_UID(uid: string): void {
     this.uid = uid;
   }
   @Mutation
-  SET_EMAIL(email: string) {
+  SET_EMAIL(email: string): void {
     this.email = email;
   }
   @Mutation
-  SET_DISPLAYNAME(displayName: string) {
+  SET_DISPLAYNAME(displayName: string): void {
     this.displayName = displayName;
   }
   @Mutation
-  SET_PHONENUMBER(phoneNumber: string) {
+  SET_PHONENUMBER(phoneNumber: string): void {
     this.phoneNumber = phoneNumber;
   }
   @Mutation
-  SET_PHOTOURL(photoURL: string) {
+  SET_PHOTOURL(photoURL: string): void {
     this.photoURL = photoURL;
   }
   @Mutation
-  SET_ROLES(roles: string[]) {
+  SET_ROLES(roles: Role[]): void {
     this.roles = roles;
   }
   @Mutation
-  SET_DISABLED(disabled: boolean) {
+  SET_DISABLED(disabled: boolean): void {
     this.disabled = disabled;
+  }
+  @Mutation
+  SET_FETCHUSERFLAG(val: boolean): void {
+    this.fetchUserFlag = val;
   }
 
   @Mutation
@@ -73,7 +78,7 @@ class AuthStore extends VuexModule implements User {
   }
 
   @Action
-  resetState() {
+  resetState(): void {
     this.SET_TOKEN("");
     this.SET_UID("");
     this.SET_EMAIL("");
@@ -84,7 +89,7 @@ class AuthStore extends VuexModule implements User {
     this.SET_DISABLED(false);
   }
   @Action
-  setState(userData: User) {
+  setState(userData: User): void {
     this.SET_UID(userData.uid);
     this.SET_EMAIL(userData.email);
     this.SET_DISPLAYNAME(userData.displayName);
@@ -94,7 +99,7 @@ class AuthStore extends VuexModule implements User {
     this.SET_DISABLED(userData.disabled);
   }
   @Action
-  loadUser(userData: any) {
+  loadUser(userData: any): void {
     this.SET_UID(userData.id);
     this.SET_EMAIL(userData.email);
     this.SET_DISPLAYNAME(userData.displayName);
@@ -110,7 +115,8 @@ class AuthStore extends VuexModule implements User {
   }
 
   @Action
-  async fetchUser(user: firebase.User) {
+  async fetchUser(user: firebase.User): Promise<void> {
+    if(!this.fetchUserFlag) return;
     const token = await user.getIdToken();
     this.SET_TOKEN(token);
     const result: any = await HTTP().get('/users/' + user.uid );
@@ -122,7 +128,8 @@ class AuthStore extends VuexModule implements User {
   }
 
   @Action
-  async signInWithGoogle(userRol : Role = Role.PATIENT) {
+  async signInWithGoogle(userRol : Role = Role.PATIENT): Promise<void> {
+    this.SET_FETCHUSERFLAG(false);
     const provider = new firebase.auth.GoogleAuthProvider();
     const result = await firebase.auth().signInWithPopup(provider);
     const dataUser = result.user;
@@ -165,12 +172,14 @@ class AuthStore extends VuexModule implements User {
     }
     
     this.loadUser(dataToSave);
-    this.getRouteByPriorityRole()
+    this.getRouteByPriorityRole();
+    this.SET_FETCHUSERFLAG(true);
   }
 
   @Action
   async logout() {
     await firebase.auth().signOut();
+    window.location.reload();
   }
 
   @Action
@@ -179,7 +188,7 @@ class AuthStore extends VuexModule implements User {
   }
   @Action
   async updateUserData(userData: any){
-    await HTTP().patch('/users', userData );
+    await HTTP().patch('/users/' + userData.id, userData );
   }
 
   @Action

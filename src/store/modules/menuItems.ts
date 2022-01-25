@@ -62,6 +62,22 @@ class MenuItemsStore extends VuexModule {
       icon: "mdi-home",
       imagePath: "img/configurations.png",
       belongTo: [Role.PATIENT, Role.DOCTOR]
+    },
+    {
+      state: "/admin/dashboard",
+      name: "Dashboard",
+      type: "link",
+      icon: "mdi-home",
+      imagePath: "img/scheduled-appointment.png",
+      belongTo: [Role.ADMINISTRATOR]
+    },
+    {
+      state: "/admin/access-creation",
+      name: "Creación de accesos",
+      type: "link",
+      icon: "mdi-account-key",
+      imagePath: "img/scheduled-appointment.png",
+      belongTo: [Role.ADMINISTRATOR]
     }
   ];
 }

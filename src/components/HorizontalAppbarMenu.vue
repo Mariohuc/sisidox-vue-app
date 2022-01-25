@@ -1,12 +1,12 @@
 <template>
   <div>
-    <v-btn v-if="checkIfisAdmin" icon to="/admin" color="gold">
+    <v-btn v-if="checkIfisAdmin" icon to="/admin">
       <v-icon>mdi-account-key</v-icon>
     </v-btn>
-    <v-btn v-if="checkIfisDoctor" icon to="/doctor" color="indigo" @click="clickDoctor()">
+    <v-btn v-if="checkIfisDoctor" icon to="/doctor">
       <v-icon>mdi-doctor</v-icon>
     </v-btn>
-    <v-btn v-if="checkIfisPatient" icon to="/patient" color="purple">
+    <v-btn v-if="checkIfisPatient" icon to="/patient">
       <v-icon>mdi-account</v-icon>
     </v-btn>
     <v-btn icon to="/">

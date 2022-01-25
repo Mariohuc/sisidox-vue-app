@@ -3,71 +3,51 @@
     <v-card>
       <v-card-text>
         <v-row justify="center">
-        <v-chip class="ma-2">
-          <v-avatar size="36" left :color="SCHEDULED_STATUS.color"> </v-avatar>
-          Programadas
-        </v-chip>
-        <v-chip class="ma-2">
-          <v-avatar size="36" left :color="ONGOING_STATUS.color"> </v-avatar>
-          En curso
-        </v-chip>
-        <v-chip class="ma-2">
-          <v-avatar size="36" left :color="FINISHED_STATUS.color"> </v-avatar>
-          Finalizadas
-        </v-chip>
-      </v-row>
+          <v-chip class="ma-2">
+            <v-avatar size="36" left :color="SCHEDULED_STATUS.color">
+            </v-avatar>
+            Programadas
+          </v-chip>
+          <v-chip class="ma-2">
+            <v-avatar size="36" left :color="ONGOING_STATUS.color"> </v-avatar>
+            En curso
+          </v-chip>
+          <v-chip class="ma-2">
+            <v-avatar size="36" left :color="FINISHED_STATUS.color"> </v-avatar>
+            Finalizadas
+          </v-chip>
+        </v-row>
       </v-card-text>
     </v-card>
-    <v-row class="fill-height mt-6">
-      <v-col
-        v-for="(item, i) in patients"
-        :key="i"
-        cols="12"
-        sm="6"
-        md="4"
-        lg="3"
-      >
-        <v-card color="purple accent-3" dark class="mx-0 my-0">
-          <v-fab-transition>
-            <v-btn :color="item.color" fab dark absolute top right>
-              <v-icon>mdi-calendar-cursor</v-icon>
-            </v-btn>
-          </v-fab-transition>
-          <v-card-text>
-            <v-row align="center" class="mx-0 my-0">
-              <v-col cols="12">
-                <v-text-field
-                  label="Paciente"
-                  placeholder=""
-                  v-model="item.patientName"
-                  readonly
-                  filled
-                  hide-details
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12">
-                <v-text-field
-                  label="Fecha"
-                  placeholder=""
-                  v-model="item.startTime"
-                  readonly
-                  filled
-                  hide-details
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12">
-                <v-text-field
-                  label="Ultima modificación"
-                  placeholder=""
-                  v-model="item.updatedAt"
-                  readonly
-                  filled
-                  hide-details
-                ></v-text-field>
-              </v-col>
-            </v-row>
-          </v-card-text>
+    <v-row class="fill-height mt-2">
+      <v-col cols="12">
+        <v-card>
+          <v-card-title>
+            <v-spacer></v-spacer>
+            <v-text-field
+              v-model="search"
+              append-icon="mdi-magnify"
+              label="Search"
+              single-line
+              hide-details
+            ></v-text-field>
+          </v-card-title>
+          <v-data-table :headers="headers" :items="patients" :search="search">
+            <template v-slot:[`item.apptStatus`]="{ item }">
+              <v-avatar size="24" :color="item.color"></v-avatar>
+            </template>
+            <template v-slot:[`item.actions`]="{ item }">
+              <v-btn icon color="primary" @click="showAppointment(item)"
+                ><v-icon>mdi-eye</v-icon></v-btn
+              >
+            </template>
+          </v-data-table>
         </v-card>
+      </v-col>
+      <v-col cols="12">
+        <v-dialog v-model="apptDetailDialog" max-width="700" persistent>
+          <AppointmentDetail :appointmentDetail="selectedAppt" @closeApptDetailEvent="apptDetailDialog = false"></AppointmentDetail>
+        </v-dialog>
       </v-col>
     </v-row>
   </div>
@@ -77,12 +57,17 @@
 import { Component, Vue } from "vue-property-decorator";
 import BasicReportsStore from "@/store/modules/basicReports";
 import AuthStore from "@/store/modules/auth";
-import AppointmentsStore from "@/store/modules/appointments"
+import AppointmentsStore from "@/store/modules/appointments";
 import { AppStatus } from "@/store/models";
-import { DateTime } from "luxon"
+import { DateTime } from "luxon";
+import SettingsStore from "@/store/modules/settings";
+import AppointmentDetail from "@/components/doctor/AppointmentDetail.vue"
 
 @Component({
-  name: "ScheduledAppointments"
+  name: "ScheduledAppointments",
+  components: {
+    AppointmentDetail
+  }
 })
 export default class ScheduledAppointments extends Vue {
   loading = false;
@@ -90,11 +75,22 @@ export default class ScheduledAppointments extends Vue {
   SCHEDULED_STATUS: AppStatus = AppointmentsStore.SCHEDULED_STATUS;
   ONGOING_STATUS: AppStatus = AppointmentsStore.ONGOING_STATUS;
   FINISHED_STATUS: AppStatus = AppointmentsStore.FINISHED_STATUS;
-
+  headers: Array<any> = [
+    {
+      text: "Nombre de paciente",
+      value: "patientName"
+    },
+    { text: "Fecha y hora de cita", value: "startTime" },
+    { text: "Última actualización", value: "lastModified" },
+    { text: "Estado", value: "apptStatus", align: "center" },
+    { text: "Acciones", value: "actions", align: "center", sortable: false }
+  ];
   patients: any[] = [];
-
+  search = "";
+  selectedAppt: any = null
+  apptDetailDialog = false
   created(): void {
-    this.getDoctorAppointments()
+    this.getDoctorAppointments();
   }
   reserve() {
     this.loading = true;
@@ -105,25 +101,42 @@ export default class ScheduledAppointments extends Vue {
   async getDoctorAppointments(): Promise<void> {
     const docApp: any[] = await BasicReportsStore.getDoctorAppointments({
       page: 1,
-      limit: 500,
+      limit: SettingsStore.requestDataSize,
       doctorId: AuthStore.uid,
-      recordStatus: 'A'
-    })
-    
+      recordStatus: "A"
+    });
+
     this.patients = this.formatBackendBookedAppointments(docApp);
   }
 
-  formatBackendBookedAppointments( backendData: any [] ){
-    backendData.forEach(item => {
-      item.startTime = DateTime.fromISO(item.startTime).setLocale('es').toFormat(`dd LLLL yyyy',' hh:mm a`);
-      item.updatedAt = DateTime.fromISO(item.updatedAt).setLocale('es').toFormat(`dd LLLL yyyy',' hh:mm a`);
-      switch( item.apptStatus ){
-        case this.SCHEDULED_STATUS.label: item.color = this.SCHEDULED_STATUS.color; break;
-        case this.ONGOING_STATUS.label: item.color = this.ONGOING_STATUS.color; break;
-        case this.FINISHED_STATUS.label: item.color = this.FINISHED_STATUS.color; break;
+  formatBackendBookedAppointments(backendData: any[]) {
+    backendData.forEach((item) => {
+      item.startTime = DateTime.fromISO(item.startTime)
+        .setLocale("es")
+        .toFormat(`dd LLLL yyyy',' hh:mm a`);
+      item.lastModified = DateTime.fromISO(
+        item.updatedAt ? item.updatedAt : item.createdAt
+      )
+        .setLocale("es")
+        .toFormat(`dd LLLL yyyy',' hh:mm a`);
+      switch (item.apptStatus) {
+        case this.SCHEDULED_STATUS.label:
+          item.color = this.SCHEDULED_STATUS.color;
+          break;
+        case this.ONGOING_STATUS.label:
+          item.color = this.ONGOING_STATUS.color;
+          break;
+        case this.FINISHED_STATUS.label:
+          item.color = this.FINISHED_STATUS.color;
+          break;
       }
-    })
+    });
     return backendData;
+  }
+  showAppointment(item: any): void {
+    console.log(item)
+    this.selectedAppt = item;
+    this.apptDetailDialog = true;
   }
 }
 </script>

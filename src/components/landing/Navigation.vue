@@ -38,6 +38,11 @@
           </v-list-item-content>
         </v-list-item>
       </v-list>
+      <v-list dense>
+        <v-list-item>
+          <login :vertical="true"></login>
+        </v-list-item>
+      </v-list>   
     </v-navigation-drawer>
 
     <v-app-bar
@@ -114,11 +119,11 @@ export default class Navigation extends Vue {
   drawer = false;
   isXs = false;
   items = [
-    ["mdi-home-outline", "Home", "#hero"],
-    ["mdi-information-outline", "Sobre", "#features"],
-    ["mdi-download-box-outline", "Download", "#download"],
-    ["mdi-currency-usd", "Preços", "#pricing"],
-    ["mdi-email-outline", "Contatos", "#contact"]
+    ["mdi-home-outline", "Inicio", "#hero"],
+    ["mdi-information-outline", "Nosotros", "#features"],
+    ["mdi-download-box-outline", "Como funciona", "#download"],
+    ["mdi-currency-usd", "Reserva tu cita", "#pricing"],
+    ["mdi-email-outline", "Contactanos", "#contact"]
   ];
   @Prop(String) readonly color!: string;
   @Prop(Boolean) readonly flat!: boolean;
@@ -145,11 +150,11 @@ export default class Navigation extends Vue {
       return [ ["mdi-view-dashboard", "Dashboard", this.RouteByRole] ]
     }else{
       return [
-        ["mdi-home-outline", "Home", "#hero"],
-        ["mdi-information-outline", "Sobre", "#features"],
-        ["mdi-download-box-outline", "Download", "#download"],
-        ["mdi-currency-usd", "Preços", "#pricing"],
-        ["mdi-email-outline", "Contatos", "#contact"]
+        ["mdi-home-outline", "Inicio", "#hero"],
+        ["mdi-information-outline", "Nosotros", "#features"],
+        ["mdi-download-box-outline", "Como funciona", "#download"],
+        ["mdi-currency-usd", "Reserva tu cita", "#pricing"],
+        ["mdi-email-outline", "Contactanos", "#contact"]
       ]
     }
   }

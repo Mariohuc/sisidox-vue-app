@@ -2,7 +2,7 @@
   <div class="my-2">
     <v-card v-if="mode === 'LIST'">
       <v-row class="fill-height mx-1">
-        <v-col v-for="(item, i) in patients" :key="i" cols="12" sm="6" md="4">
+        <v-col v-for="(item) in patients" :key="item.patientId" cols="12" sm="6" md="4">
           <v-card
             color="primary"
             dark
@@ -11,7 +11,7 @@
             <v-text-field
               label="Paciente"
               placeholder=""
-              v-model="item.name"
+              :value="item.patientFullname"
               readonly
               hide-details
               class="mx-3 my-3"
@@ -20,7 +20,7 @@
             <v-btn
               color="pink"
               class="mx-3 my-3"
-              @click="watchDetail()"
+              @click="watchDetail(item)"
               fab
               small
               dark
@@ -33,7 +33,10 @@
     </v-card>
     <MedicalRecordDetail
       v-if="mode === 'HISTORY'"
-      v-on:changeMode="modeList()"
+      :key="currentPatient.patientId"
+      :patientId="currentPatient.patientId"
+      :patientFullname="currentPatient.patientFullname"     
+      @changeMode="modeList()"
     ></MedicalRecordDetail>
   </div>
 </template>
@@ -41,6 +44,9 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import MedicalRecordDetail from "./MedicalRecordDetail.vue";
+import BasicReportsStore from "@/store/modules/basicReports";
+import SettingsStore from "@/store/modules/settings";
+import AuthStore from "@/store/modules/auth";
 
 @Component({
   name: "MedicalRecords",
@@ -52,41 +58,31 @@ export default class MedicalRecords extends Vue {
   loading = false;
   mode = "";
   modes = ["LIST", "HISTORY"];
-  patients = [
-    {
-      name: "JULIETA VENEGA",
-      date: "18 de mayo 2021 8:00 AM",
-      lastModified: "15 de mayo 2021 8:00 AM"
-    },
-    {
-      name: "FRANCISCO TORRES",
-      date: "18 de mayo 2021 8:00 AM",
-      lastModified: "16 de mayo 2021 8:00 AM"
-    },
-    {
-      name: "RAUL ROMERO",
-      date: "18 de mayo 2021 8:00 AM",
-      lastModified: "16 de mayo 2021 8:00 AM"
-    },
-    {
-      name: "EDUARDO GUTIERREZ GAMES",
-      date: "18 de mayo 2021 8:00 AM",
-      lastModified: "16 de mayo 2021 8:00 AM"
-    },
-    {
-      name: "RODOLFO ELRENO",
-      date: "18 de mayo 2021 8:00 AM",
-      lastModified: "15 de mayo 2021 9:00 AM"
-    }
-  ];
+  patients: Array<any> = [];
   created(): void {
     this.modeList();
+    this.loadDoctorPatients();
   }
-  watchDetail(): void {
+  currentPatient: { patientId: string, patientFullname: string } = { patientId: "", patientFullname: "" }
+  async loadDoctorPatients(): Promise<void> {
+    const data: Array<any> = await BasicReportsStore.getDoctorPatients({ 
+      page: 1,
+      limit: SettingsStore.requestDataSize,
+      doctorId: AuthStore.uid,
+      recordStatus: "A"
+     });
+
+    if( data.length > 0 ){
+      this.patients = data;
+    }
+  }
+  watchDetail(item: { patientId: string, patientFullname: string }): void {
     this.mode = this.modes[1];
+    this.currentPatient = item;
   }
   modeList(): void {
     this.mode = this.modes[0];
+    this.currentPatient = { patientId: "", patientFullname: "" }
   }
   reserve() {
     this.loading = true;

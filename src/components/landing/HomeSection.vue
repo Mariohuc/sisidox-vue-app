@@ -76,18 +76,10 @@
       <v-row align="center" justify="center">
         <v-col cols="10">
           <v-row align="center" justify="space-around">
-            <!-- <v-col cols="12" class="text-center">
-              <h1 class="font-weight-light display-2">Title</h1>
-              <h1 class="font-weight-light">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-              </h1>
-            </v-col> -->
             <v-col
               cols="12"
               sm="4"
               class="text-center"
-              v-for="(feature, i) in features"
-              :key="i"
             >
               <v-hover v-slot:default="{ hover }">
                 <v-card
@@ -97,14 +89,66 @@
                   :class="{ up: hover }"
                 >
                   <v-img
-                    :src="feature.img"
+                    :src="require('@/assets/img/icon2.png')"
                     max-width="100px"
                     class="d-block ml-auto mr-auto"
                     :class="{ 'zoom-efect': hover }"
                   ></v-img>
-                  <h1 class="font-weight-regular">{{ feature.title }}</h1>
-                  <h4 class="font-weight-regular subtitle-1">
-                    {{ feature.text }}
+                  <h1 class="font-weight-regular px-6">¿Porque elegir Sisidox?</h1>
+                  <h4 class="font-weight-regular body-2 px-6">
+                    Porque te permite acceder a consultas médicas desde cualquier ubicación, con rapidez y conveniencia, teniendo una carta amplia de especialidades a tu servicio.
+                  </h4>
+                </v-card>
+              </v-hover>
+            </v-col>
+
+            <v-col
+              cols="12"
+              sm="4"
+              class="text-center"
+            >
+              <v-hover v-slot:default="{ hover }">
+                <v-card
+                  class="card"
+                  shaped
+                  :elevation="hover ? 10 : 4"
+                  :class="{ up: hover }"
+                >
+                  <v-img
+                    :src="require('@/assets/img/icon1.png')"
+                    max-width="100px"
+                    class="d-block ml-auto mr-auto"
+                    :class="{ 'zoom-efect': hover }"
+                  ></v-img>
+                  <h1 class="font-weight-regular px-6">Lugares más cercanos</h1>
+                  <h4 class="font-weight-regular body-2 px-6">
+                    Como hospitales y farmacias
+                  </h4>
+                </v-card>
+              </v-hover>
+            </v-col>
+
+            <v-col
+              cols="12"
+              sm="4"
+              class="text-center"
+            >
+              <v-hover v-slot:default="{ hover }">
+                <v-card
+                  class="card"
+                  shaped
+                  :elevation="hover ? 10 : 4"
+                  :class="{ up: hover }"
+                >
+                  <v-img
+                    :src="require('@/assets/img/icon3.png')"
+                    max-width="100px"
+                    class="d-block ml-auto mr-auto"
+                    :class="{ 'zoom-efect': hover }"
+                  ></v-img>
+                  <h1 class="font-weight-regular px-6">Cita en curso</h1>
+                  <h4 class="font-weight-regular body-2 px-6">
+                    Visualice sus cita(s) en curso.
                   </h4>
                 </v-card>
               </v-hover>
@@ -140,8 +184,8 @@ export default class HomeSection extends Vue {
   features = [
     {
       img: require("@/assets/img/icon2.png"),
-      title: "Design Limpo",
-      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+      title: "¿Porque elegir Sisidox?",
+      text: ""
     },
     {
       img: require("@/assets/img/icon1.png"),
