@@ -64,29 +64,29 @@
       />
       <div v-else class="d-flex flex-row-reverse">
         <div v-if="LoggedIn">
-          <v-btn text @click="goTo(RouteByRole)">
-            <span class="mr-2">Dashboard</span>
+          <v-btn text @click="goTo(RouteByRole)" class="mr-2">
+            <span>Dashboard</span>
           </v-btn>
           <login></login>
         </div>
-        <div v-else>
+        <v-btn-toggle tile group v-else>
           <v-btn text @click="$vuetify.goTo('#hero')">
-            <span class="mr-2">Inicio</span>
+            <span>Inicio</span>
           </v-btn>
           <v-btn text @click="$vuetify.goTo('#features')">
-            <span class="mr-2">Nosotros</span>
+            <span>Nosotros</span>
           </v-btn>
           <v-btn text @click="$vuetify.goTo('#download')">
-            <span class="mr-2">Como funciona</span>
+            <span>Como funciona</span>
           </v-btn>
           <v-btn text @click="$vuetify.goTo('#pricing')">
-            <span class="mr-2">Reserva tu cita</span>
+            <span>Reserva tu cita</span>
           </v-btn>
           <v-btn text @click="$vuetify.goTo('#contact')">
-            <span class="mr-2">Contactanos</span>
+            <span>Contactanos</span>
           </v-btn>
           <login></login>
-        </div>
+        </v-btn-toggle>
         
       </div>
       
@@ -110,6 +110,7 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import login from "@/components/Login.vue"
 import AuthStore from "@/store/modules/auth";
 import { Role } from "@/store/models";
+import GlobalsStore from "@/store/modules/globals";
 
 @Component({
   name: "Navigation",
@@ -129,7 +130,7 @@ export default class Navigation extends Vue {
   @Prop(Boolean) readonly flat!: boolean;
 
   onResize(): void {
-    this.isXs = window.innerWidth < 850;
+    this.isXs = GlobalsStore.NativeWindow.innerWidth < 850;
   }
 
   @Watch("isXs")
@@ -143,7 +144,7 @@ export default class Navigation extends Vue {
 
   mounted(): void {
     this.onResize();
-    window.addEventListener("resize", this.onResize, { passive: true });
+    GlobalsStore.NativeWindow.addEventListener("resize", this.onResize, { passive: true });
   }
   get MenuItems(): Array<any> {
     if( AuthStore.uid ){

@@ -84,17 +84,16 @@ export interface DoctorData {
   recordStatus: string;
 }
 export interface DoctorSum {
-  appointmentCost: number
-  cmpNumber: string
-  doctorId: string
-  doctorRating: number
-  fullname: string
-  gender: string
-  mpAccessToken: string
-  numberOfReviews: number
-  photoUrl: string
-  specialty: string
-  specialtyName: string
+  appointmentCost: number;
+  cmpNumber: string;
+  doctorId: string;
+  doctorRating: number;
+  fullname: string;
+  gender: string;
+  numberOfReviews: number;
+  photoUrl: string;
+  specialty: string;
+  specialtyName: string;
 }
 
 export interface DictionaryWord {
@@ -122,53 +121,74 @@ export interface Pagination {
 }
 
 export interface DoctorCreationTicket {
-  createdAt: string
-  documentNumber: string
-  documentType: string
-  id: string
-  recordStatus: string
+  createdAt: string;
+  documentNumber: string;
+  documentType: string;
+  id: string;
+  recordStatus: string;
 }
 
 export interface BookedAppointment {
-  id: string
-  patientId: string
-  doctorId: string
-  startTime: string
-  endTime: string
-  previousPatientComments: string
-  doctorConclusions: string
-  medicationSupplied: string
-  mpPaymentId: string
-  mpPaymentStatus: string
-  createdAt: string
-  updatedAt: string
-  apptStatus: string
-  recordStatus: string
+  id: string;
+  patientId: string;
+  doctorId: string;
+  startTime: string;
+  endTime: string;
+  previousPatientComments: string;
+  doctorConclusions: string;
+  medicationSupplied: string;
+  mpPaymentId: string;
+  mpPaymentStatus: string;
+  createdAt: string;
+  updatedAt: string;
+  apptStatus: string;
+  recordStatus: string;
 }
 
-export interface SnackBarParams{
-  snackbar: boolean
-  timeout?: number
-  color: string
-  text: string
+export interface MpSellerCredential {
+  id: string;
+  userId: string;
+  accessToken?: string;
+  refreshToken: string;
+  publicKey: string;
+  createdAt: string;
+  updatedAt: string;
+  recordStatus: string;
 }
 
-export interface AlertParams{
-  visible: boolean
-  type: string
-  icon?: string
-  text: string
+export interface SnackBarParams {
+  snackbar: boolean;
+  timeout?: number;
+  color: string;
+  text: string;
+}
+
+export interface AlertParams {
+  visible: boolean;
+  type: string;
+  icon?: string;
+  text: string;
+}
+
+export interface MercadoPagoPayload {
+  token: string;
+  issuer_id?: string;
+  payment_method_id: string;
+  transaction_amount: number;
+  installments: number;
+  description: string;
+  payer: { email: string; identification?: { type: string; number: string } };
 }
 
 export interface CardFormData {
-  amount: string,
-  cardholderEmail: string
-  identificationNumber: string
-  identificationType: string
-  installments: string
-  issuerId: string
-  merchantAccountId: string
-  paymentMethodId: string
-  processingMode: string
-  token: string
+  amount: string;
+  cardholderEmail: string;
+  identificationNumber: string;
+  identificationType: string;
+  installments: string;
+  issuerId: string;
+  merchantAccountId: string;
+  paymentMethodId: string;
+  processingMode: string;
+  token: string;
 }

@@ -28,6 +28,15 @@ firebase.auth().onAuthStateChanged(async (user) => {
   }
     
 });
+
+export function getCurrentUser(): Promise<firebase.User | null>{
+  return new Promise((resolve, reject) => {
+      const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+          unsubscribe();
+          resolve(user);
+      }, reject);
+  })
+};
  
 Vue.use(VueClipboard)
 Vue.use(VueYouTubeEmbed);

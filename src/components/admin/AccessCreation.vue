@@ -75,6 +75,7 @@ import DoctorCreationTicketsStore from "@/store/modules/doctorCreationTickets"
 import { SnackBarParams } from "@/store/models";
 import GeneralSnackBar from "@/components/general/GeneralSnackBar.vue";
 import { getSnackBarErrorParams } from "@/general-utils"
+import GlobalsStore from "@/store/modules/globals";
 
 @Component({
   name: "AccessCreation",
@@ -122,7 +123,7 @@ export default class AccessCreation extends Vue {
   }
   get dACurlPath(): string {
     if( !this.currentDcTicketId ) return "Aqui se mostrará el enlace";
-    return window.location.href.substring(0, window.location.href.lastIndexOf('/#/')+3) + 'register-doctor/' + this.currentDcTicketId
+    return GlobalsStore.NativeWindow.location.href.substring(0, GlobalsStore.NativeWindow.location.href.lastIndexOf('/#/')+3) + 'register-doctor/' + this.currentDcTicketId
   }
 
   updateSnackBarStatus(val: boolean){

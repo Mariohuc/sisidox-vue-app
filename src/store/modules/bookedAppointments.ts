@@ -6,10 +6,8 @@ import {
   getModule,
   Mutation
 } from "vuex-module-decorators";
-import { AppointmentTicket, AppStatus } from "../models";
+import { AppointmentTicket, AppStatus, MercadoPagoPayload } from "../models";
 import store from "@/store";
-import firebase from "firebase";
-import { DateTime } from "luxon";
 import HTTP from "@/http";
 
 config.rawError = true;
@@ -42,8 +40,9 @@ class BookedAppointmentsStore extends VuexModule {
 
   @Action
   async createBookedAppointment(allData: {
-    mercadoPagoData?: any,
-    appointmentData: { 
+    mercadoPagoData?: MercadoPagoPayload,
+    mpSellerCredentialId?: string,
+    appointmentData: {
       apptTicketId: number,
       patientId: string,
       doctorId: string,

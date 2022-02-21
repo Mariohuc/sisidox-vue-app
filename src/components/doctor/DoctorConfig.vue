@@ -141,6 +141,19 @@
           </v-form>
         </v-expansion-panel-content>
       </v-expansion-panel>
+
+      <v-expansion-panel>
+        <v-expansion-panel-header>
+          Métodos de pago
+          <template v-slot:actions>
+            <v-icon color="primary"> $expand </v-icon>
+          </template>
+        </v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <PaymentMethods></PaymentMethods>
+        </v-expansion-panel-content>
+
+      </v-expansion-panel>
     </v-expansion-panels>
 
     <v-snackbar v-model="snackbarDD" :color="snackbarDDColor">
@@ -167,11 +180,13 @@ import DoctorDataStore from "@/store/modules/doctorData";
 import AuthStore from "@/store/modules/auth";
 
 import DoctorAvatarEditor from "@/components/doctor/DoctorAvatarEditor.vue";
+import PaymentMethods from "@/components/doctor/PaymentMethods.vue"
 
 @Component({
   name: "DoctorConfig",
   components: {
-    DoctorAvatarEditor
+    DoctorAvatarEditor,
+    PaymentMethods
   }
 })
 export default class DoctorConfig extends Vue {

@@ -3,6 +3,7 @@
 </template>
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import GlobalsStore from "@/store/modules/globals";
 
 declare const JitsiMeetExternalAPI: any;
 
@@ -24,8 +25,8 @@ export default class AppointmentVideoCall extends Vue {
     this.jitsiData.domainjit = 'meet.jit.si';
     this.jitsiData.optionsjit = {
         roomName: this.$route.params.bookedApptId,
-        width: window.innerWidth,
-        height: window.innerHeight,
+        width: GlobalsStore.NativeWindow.innerWidth,
+        height: GlobalsStore.NativeWindow.innerHeight,
         parentNode: document.querySelector('#jitsi-meet'),
     };
 

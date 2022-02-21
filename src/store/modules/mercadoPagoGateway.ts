@@ -7,6 +7,8 @@ import {
   Mutation
 } from "vuex-module-decorators";
 import store from "@/store";
+import { MercadoPagoPayload } from "../models";
+import { GeneralError } from "@/utilities/generalError";
 
 config.rawError = true;
 declare const MercadoPago: any;
@@ -16,28 +18,23 @@ interface DefaultConfigs {
   paymentMethodId: string;
 }
 
-interface MercadoPagoPayload {
-  token: string;
-  issuer_id?: string;
-  payment_method_id: string;
-  transaction_amount: number;
-  installments: number;
-  description: string;
-  payer: { email: string; identification?: { type: string; number: string } };
-}
-
 @Module({
   dynamic: true,
   store,
   name: "MercadoPagoGatewayStore"
 })
 class MercadoPagoGatewayStore extends VuexModule {
-  public mercadoPago: any = new MercadoPago(process.env.VUE_APP_MP_PUBLIC_KEY);
+  public mercadoPago: any;
 
   public defaultConfigs: DefaultConfigs = {
     installments: 1,
     paymentMethodId: "visa"
   };
+
+  @Mutation
+  SET_MERCADO_PAGO_INSTANCE(val: any): void {
+    this.mercadoPago = val;
+  }
 
   get MercadoPago(): any {
     return this.mercadoPago;
@@ -45,6 +42,12 @@ class MercadoPagoGatewayStore extends VuexModule {
 
   get DefaultConfigs(): DefaultConfigs {
     return this.defaultConfigs;
+  }
+
+  @Action
+  initMercadoPago(publicKey: string): void {
+    const mp: any = new MercadoPago(publicKey);
+    this.SET_MERCADO_PAGO_INSTANCE(mp);
   }
 
   @Action
@@ -71,19 +74,23 @@ class MercadoPagoGatewayStore extends VuexModule {
        cardExpirationYear: '25',
        securityCode: '123'
      */
-    console.log(allData)
-    const cardToken: { id: string } = await this.MercadoPago.createCardToken(allData.cardData);
+    try {
+      const cardToken: { id: string } = await this.MercadoPago.createCardToken(allData.cardData);
 
-    return {
-      token: cardToken.id,
-      payment_method_id: this.DefaultConfigs.paymentMethodId,
-      transaction_amount: allData.additionalData.amount,
-      installments: this.DefaultConfigs.installments,
-      description: allData.additionalData.specialty ? "Cita para: " + allData.additionalData.specialty : "Cita General",
-      payer: {
-        email: allData.additionalData.cardholderEmail
-      }
-    };
+      return {
+        token: cardToken.id,
+        payment_method_id: this.DefaultConfigs.paymentMethodId,
+        transaction_amount: allData.additionalData.amount,
+        installments: this.DefaultConfigs.installments,
+        description: allData.additionalData.specialty ? "Cita para: " + allData.additionalData.specialty : "Cita General",
+        payer: {
+          email: allData.additionalData.cardholderEmail
+        }
+      };
+    } catch (error) {
+      throw new GeneralError('Error al procesar la tarjeta, por favor revise sus datos')
+    }
+    
   }
 }
 

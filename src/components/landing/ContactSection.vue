@@ -11,6 +11,9 @@
                 Teléfono: +51 964 810 483
               </h4>
               <h4 class="font-weight-light">Email: sisidox.sac@gmail.com</h4>
+              
+            </v-col>
+            <v-col cols="12" md="7">
               <v-divider class="my-6"></v-divider>
               <div>
                 <div class="footer-links">
@@ -20,44 +23,9 @@
                     <li><span class="mdi mdi-chevron-right"></span> <a href="#">Términos y condiciones</a></li>
                     <li><span class="mdi mdi-chevron-right"></span> <a href="#">Politicas de privacidad</a></li>
                   </ul>
-              </div>
+                </div>
                 
               </div>
-            </v-col>
-            <v-col cols="12" md="7">
-              <v-form ref="form" v-model="valid" :lazy-validation="lazy">
-                <v-text-field
-                  v-model="name"
-                  :rules="nameRules"
-                  label="Nombre"
-                  required
-                ></v-text-field>
-
-                <v-text-field
-                  v-model="email"
-                  :rules="emailRules"
-                  label="E-mail"
-                  required
-                ></v-text-field>
-
-                <v-textarea
-                  v-model="textArea"
-                  :rules="textAreaRules"
-                  label="Mensaje"
-                  required
-                />
-
-                <v-btn
-                  :disabled="!valid"
-                  color="primary"
-                  :dark="valid"
-                  rounded
-                  block
-                  class="mt-3"
-                >
-                  Enviar
-                </v-btn>
-              </v-form>
             </v-col>
           </v-row>
         </v-col>
@@ -149,13 +117,14 @@
 <script lang="ts">
 // import {db} from '@/main'
 import { Component, Vue } from "vue-property-decorator";
+import GlobalsStore from "@/store/modules/globals";
 
 @Component({
   name: "ContactSection",
 })
 export default class ContactSection extends Vue {
   icons = ["fa-facebook", "fa-twitter", "fa-linkedin", "fa-instagram"];
-  valid = true;
+  
   name = "";
   nameRules = [
     (v: any) => !!v || "El nombre es requerido",
@@ -172,7 +141,7 @@ export default class ContactSection extends Vue {
     (v: any) => !!v || "El mensaje es requerido",
     (v: any) => (v && v.length >= 10) || "Mínimo de 10 caracteres",
   ];
-  lazy = false;
+  
   snackbar = {
     enabled: false,
     text: "",
@@ -182,12 +151,12 @@ export default class ContactSection extends Vue {
   isXs = false;
 
   onResize(): void {
-    this.isXs = window.innerWidth < 850;
+    this.isXs = GlobalsStore.NativeWindow.innerWidth < 850;
   }
 
   mounted(): void {
     this.onResize();
-    window.addEventListener("resize", this.onResize, { passive: true });
+    GlobalsStore.NativeWindow.addEventListener("resize", this.onResize, { passive: true });
   }
 }
 </script>

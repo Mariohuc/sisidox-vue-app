@@ -1,7 +1,7 @@
 <template>
   <v-dialog v-model="dialog" transition="dialog-top-transition" max-width="550">
     <template v-slot:activator="{ on, attrs }">
-      <v-btn class="pl-0" v-if="loggedIn" rounded :block="vertical" outlined @click="logout">
+      <v-btn class="pl-0" v-if="loggedIn" rounded :block="vertical" outlined @click="logout" :loading="loginBtnLoading">
           <v-avatar v-if="!vertical" size="35" left>
             <img
               :src="photoUrl"
@@ -10,7 +10,7 @@
           </v-avatar>
         <span class="ml-2">Salir</span>
       </v-btn>
-      <v-btn v-else rounded :block="vertical" outlined v-bind="attrs" v-on="on"
+      <v-btn v-else rounded :block="vertical" outlined v-bind="attrs" v-on="on" :loading="loginBtnLoading"
         ><span>Iniciar sesión</span></v-btn
       >
     </template>
@@ -61,6 +61,9 @@ export default class Login extends Vue {
   }
   get photoUrl(): string {
     return AuthStore.photoURL;
+  }
+  get loginBtnLoading(): boolean {
+    return AuthStore.fetchUserLoading;
   }
   async signInWithGoogle(): Promise<void> {
     try {

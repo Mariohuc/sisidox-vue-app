@@ -46,6 +46,7 @@ import about from "@/components/landing/AboutSection.vue";
 import download from "@/components/landing/DownloadSection.vue";
 import pricing from "@/components/landing/PricingSection.vue";
 import contact from "@/components/landing/ContactSection.vue";
+import GlobalsStore from "@/store/modules/globals";
 
 @Component({
   name: "Home",
@@ -65,9 +66,9 @@ export default class Home extends Vue {
   flat = false;
 
   created(): void {
-    const top = window.pageYOffset || 0;
+    const top = GlobalsStore.NativeWindow.pageYOffset || 0;
     if (top <= 60) {
-      this.color = "transparent";
+      this.color = "blue lighten-2";
       this.flat = true;
     }
   }
@@ -78,14 +79,14 @@ export default class Home extends Vue {
       this.color = "secondary";
       this.flat = false;
     } else {
-      this.color = "transparent";
-      this.flat = true;
+      this.color = "blue lighten-2";
+      this.flat = false;
     }
   }
 
   onScroll(e: any): void {
-    if (typeof window === "undefined") return;
-    const top = window.pageYOffset || e.target.scrollTop || 0;
+    if (typeof GlobalsStore.NativeWindow === "undefined") return;
+    const top = GlobalsStore.NativeWindow.pageYOffset || e.target.scrollTop || 0;
     this.fab = top > 60;
   }
   toTop(): void {

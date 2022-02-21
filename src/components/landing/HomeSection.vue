@@ -1,6 +1,6 @@
 <template>
   <section id="hero">
-    <v-parallax dark src="@/assets/img/bgHero.jpg" height="750">
+    <v-parallax dark src="@/assets/img/hero-bg.jpg" height="750">
       <v-row align="center" justify="center">
         <v-col cols="10">
           <v-row align="center" justify="center">
@@ -124,6 +124,14 @@
                   <h4 class="font-weight-regular body-2 px-6">
                     Como hospitales y farmacias
                   </h4>
+                  <div class="d-flex justify-center mt-3">
+                    <v-avatar @click="seePlacesBy(0)" rounded size="36" class="mx-2">
+                      <img src="img/edificio-del-hospital.png" alt="" />
+                    </v-avatar>
+                    <v-avatar @click="seePlacesBy(1)" rounded size="36" class="mx-2">
+                      <img src="img/farmacia.png" alt="" />
+                    </v-avatar>
+                  </div>
                 </v-card>
               </v-hover>
             </v-col>
@@ -166,6 +174,12 @@
         ></youtube>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="dialog2" width="900px">
+      <v-card>
+        <!-- HERE -->
+        <iframe v-if="currentPlace" id="iframe01" :src="currentPlace.map_embed_source" height="600px" width="100%"></iframe>
+      </v-card>
+    </v-dialog>
     <div class="svg-border-waves">
       <img src="~@/assets/img/wave2.svg" />
     </div>
@@ -199,6 +213,23 @@ export default class HomeSection extends Vue {
     }
   ];
   player: any;
+
+  dialog2 = false;
+
+  places: Array<any> = [
+    { 
+      map_embed_source: 'https://www.google.com/maps/embed/v1/search?q=hospitales%20cerca%20de%20mi&key=AIzaSyCyzI6WMD8tmq7krGGbDJx17cJk8kgNZ3s'
+    },
+    {
+      map_embed_source: 'https://www.google.com/maps/embed/v1/search?q=farmacias%20cerca%20de%20mi&key=AIzaSyCyzI6WMD8tmq7krGGbDJx17cJk8kgNZ3s'
+    }
+  ]
+  currentPlace: any = null
+
+  seePlacesBy(id: number): void {
+    this.currentPlace = this.places[id];
+    this.dialog2 = true;
+  }
 
   @Watch("dialog")
   dialogChange(value: any): void {

@@ -27,7 +27,7 @@
             <v-text-field
               v-model="search"
               append-icon="mdi-magnify"
-              label="Search"
+              label="Buscar"
               single-line
               hide-details
             ></v-text-field>
@@ -39,6 +39,9 @@
             <template v-slot:[`item.actions`]="{ item }">
               <v-btn icon color="primary" @click="showAppointment(item)"
                 ><v-icon>mdi-eye</v-icon></v-btn
+              >
+              <v-btn icon color="success" v-if="checkForVideocall(item)" @click="openVideocall(item)"
+                ><v-icon>mdi-video-check</v-icon></v-btn
               >
             </template>
           </v-data-table>
@@ -62,6 +65,7 @@ import { AppStatus } from "@/store/models";
 import { DateTime } from "luxon";
 import SettingsStore from "@/store/modules/settings";
 import AppointmentDetail from "@/components/doctor/AppointmentDetail.vue"
+import GlobalsStore from "@/store/modules/globals";
 
 @Component({
   name: "ScheduledAppointments",
@@ -137,6 +141,13 @@ export default class ScheduledAppointments extends Vue {
     console.log(item)
     this.selectedAppt = item;
     this.apptDetailDialog = true;
+  }
+  checkForVideocall(item: any): boolean {
+    return item.apptStatus == this.ONGOING_STATUS.label;
+  }
+  openVideocall(item: any): void {
+    const url = `${GlobalsStore.NativeWindow.location.protocol}//${GlobalsStore.NativeWindow.location.host}/#/appointment-video-call/${item.id}`;
+    GlobalsStore.NativeWindow.open(url, "_blank");
   }
 }
 </script>

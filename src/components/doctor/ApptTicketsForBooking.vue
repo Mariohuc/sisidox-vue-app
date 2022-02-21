@@ -11,7 +11,7 @@
             <v-pagination
               v-model="page"
               :length="totalPages"
-              @change="() => console.log('shiiiit ')"
+              @change="() => console.log('Changed in shifts page')"
             ></v-pagination>
           </v-card-actions>
           <v-card-text>
@@ -50,6 +50,7 @@
                         block
                         v-text="getShift(item.startTime)"
                         class="my-1"
+                        :disabled="!item.isFree && !isAvailableToCharge"
                         @click="chooseShift(item)"
                       ></v-btn>
                     </v-badge>
@@ -113,7 +114,7 @@
             <v-form ref="mpForm" v-model="mpFormValid">
               <v-row>
                 <v-col cols="12" md="4">
-                  <v-text-field v-model="mpFormData.cardNumber" label="Número de tarjeta" name="cardNumber" dense :rules="[(v) => !!v || 'Este campo es requerido']"></v-text-field>
+                  <v-text-field v-model="mpFormData.cardNumber" v-mask="'#### #### #### ####'" label="Número de tarjeta" name="cardNumber" dense :rules="[(v) => !!v || 'Este campo es requerido']"></v-text-field>
                   
                 </v-col>
                 <v-col cols="12" md="4">
@@ -131,10 +132,13 @@
                 <v-col cols="12" md="4">
                   <v-text-field v-model="mpFormData.securityCode" label="Código de seguridad" name="securityCode" dense :rules="[(v) => !!v || 'Este campo es requerido']"></v-text-field>                
                 </v-col>
-                                                                       
+                                                                   
               </v-row>   
             </v-form>
           </v-card-text>
+          <v-card-actions class="d-flex flex-row-reverse">
+            By visa <v-img class="mr-1" src="img/visa-logo.png" max-width="30px" />
+          </v-card-actions>
         </v-card>
         <v-btn color="primary" :disabled="!mpFormValid" @click="step = 4"> Continuar </v-btn>      
         <v-btn text @click="step = 2"> Atrás </v-btn>
@@ -235,15 +239,14 @@ import AuthStore from "@/store/modules/auth";
 import AppointmentsStore from "@/store/modules/appointments";
 import BookedAppointmentsStore from "@/store/modules/bookedAppointments";
 import MercadoPagoGatewayStore from "@/store/modules/mercadoPagoGateway";
+import MpSellerCredentialsStore from "@/store/modules/mpSellerCredentials";
 import { paginator } from "@/utilities/paginator";
 import { DateTime } from "luxon";
-import { AppointmentTicket, CardFormData, DoctorSum, SnackBarParams } from "@/store/models";
+import { AppointmentTicket, DoctorSum, MpSellerCredential, SnackBarParams } from "@/store/models";
 
 import GeneralSnackBar from "@/components/general/GeneralSnackBar.vue"
 import { getSnackBarErrorParams } from "@/general-utils";
-import { getMercadoPagoPayload } from "./utils";
 
-declare var MercadoPago: any;
 
 @Component({
   name: "ApptTicketsForBooking",
@@ -283,13 +286,33 @@ export default class ApptTicketsForBooking extends Vue {
     securityCode: '',
     cardholderEmail: ''
   }
+
+  mpSellerCredential?: MpSellerCredential
+  isAvailableToCharge = false
  
   created(): void {
+    this.getMpSellerCredential(this.doctor.doctorId);
     this.getAppointmentTickets(this.doctor.doctorId);
   }
 
   get colsPerPageItems(): number {
     return parseInt(String(12 / this.perPageItems), 10);
+  }
+
+  async getMpSellerCredential(doctorId: string): Promise<void> {
+    const [record]: Array<MpSellerCredential> = await MpSellerCredentialsStore.getAll({ userId: doctorId });
+    if( record ){
+      this.mpSellerCredential = record;
+
+      const date: string = this.mpSellerCredential.updatedAt ? this.mpSellerCredential.updatedAt : this.mpSellerCredential.createdAt;
+      const toCompare: any = DateTime.fromISO(date).plus({ days: 170 });
+
+      if( DateTime.now() < toCompare ){
+        this.isAvailableToCharge = true;
+        MercadoPagoGatewayStore.initMercadoPago(this.mpSellerCredential.publicKey);
+        console.log('Mercado Pago Re-init')
+      }      
+    }
   }
 
   async getAppointmentTickets(doctorId: string): Promise<void> {
@@ -339,20 +362,23 @@ export default class ApptTicketsForBooking extends Vue {
       }
 
       let mercadoPagoData: any = undefined;
+      let mpSellerCredentialId: string | undefined;
       if( this.selectedTicket && !this.selectedTicket.isFree ){
         const dateArray = this.mpFormData.cardExpirationDate.split('/');
-        mercadoPagoData = await MercadoPagoGatewayStore.createMercadoPagoPayload({ cardData: { cardNumber: this.mpFormData.cardNumber,
+        mercadoPagoData = await MercadoPagoGatewayStore.createMercadoPagoPayload({ cardData: { 
+          cardNumber: this.mpFormData.cardNumber.replace(/\s+/g, ''),
           cardholderName: this.mpFormData.cardholderName,
           cardExpirationMonth: dateArray[0],
           cardExpirationYear: dateArray[1],
           securityCode: this.mpFormData.securityCode }, additionalData: { amount: this.selectedTicket.cost, cardholderEmail: this.mpFormData.cardholderEmail, specialty: this.doctor.specialtyName } })
+        mpSellerCredentialId = this.mpSellerCredential?.id;
       }
 
       const appointmentData: any = this.getDataToSave();
     
-      await BookedAppointmentsStore.createBookedAppointment({ appointmentData, mercadoPagoData });
+      const response: any = await BookedAppointmentsStore.createBookedAppointment({ appointmentData, mpSellerCredentialId, mercadoPagoData });
       this.mainFormFinished = true
-      return { snackbar: true, color: 'success', text: 'Completado, le notificaremos 5 minutos antes de su cita!', timeout: 10000 }
+      return { snackbar: true, color: 'success', text: response.message, timeout: 15000 }
     } catch (error) {
       console.log(error)
       return getSnackBarErrorParams(error)

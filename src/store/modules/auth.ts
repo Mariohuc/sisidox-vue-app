@@ -11,6 +11,7 @@ import store from "@/store";
 import firebase from "firebase";
 import HTTP from "@/http";
 import { DateTime } from "luxon";
+import GlobalsStore from "@/store/modules/globals";
 
 config.rawError = true;
 
@@ -34,6 +35,7 @@ class AuthStore extends VuexModule implements User {
 
   public currentUserMode: Role = Role.GUEST;
   public fetchUserFlag = true
+  public fetchUserLoading = false
   //vuex-module-decorators allow Automatic getter detection
   @Mutation
   SET_TOKEN(token: string): void {
@@ -76,6 +78,10 @@ class AuthStore extends VuexModule implements User {
   SET_CURRENT_USER_MODE(role: Role) {
     this.currentUserMode = role;
   }
+  @Mutation
+  SET_FETCH_USER_LOADING(val: boolean): void {
+    this.fetchUserLoading = val;
+  }
 
   @Action
   resetState(): void {
@@ -117,14 +123,21 @@ class AuthStore extends VuexModule implements User {
   @Action
   async fetchUser(user: firebase.User): Promise<void> {
     if(!this.fetchUserFlag) return;
-    const token = await user.getIdToken();
-    this.SET_TOKEN(token);
-    const result: any = await HTTP().get('/users/' + user.uid );
-    const _user: any = result.data.data;
-    if (_user) {
-      this.loadUser(_user)
-      this.getRouteByPriorityRole()
-    }
+    try {
+      this.SET_FETCH_USER_LOADING(true)
+      const token = await user.getIdToken();
+      this.SET_TOKEN(token);
+      const result: any = await HTTP().get('/users/' + user.uid );
+      const _user: any = result.data.data;
+      if (_user) {
+        this.loadUser(_user)
+        this.getRouteByPriorityRole()
+      }
+    } catch (error: any) {
+      console.log(error.message)
+    } finally {
+      this.SET_FETCH_USER_LOADING(false)
+    } 
   }
 
   @Action
@@ -179,7 +192,7 @@ class AuthStore extends VuexModule implements User {
   @Action
   async logout() {
     await firebase.auth().signOut();
-    window.location.reload();
+    GlobalsStore.NativeWindow.location.reload();
   }
 
   @Action

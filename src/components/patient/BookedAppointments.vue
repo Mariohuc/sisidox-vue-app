@@ -26,7 +26,7 @@
             <v-text-field
               v-model="search"
               append-icon="mdi-magnify"
-              label="Search"
+              label="Buscar"
               single-line
               hide-details
             ></v-text-field>
@@ -38,6 +38,9 @@
             <template v-slot:[`item.actions`]="{ item }">
               <v-btn icon color="primary" @click="showAppointment(item)"
                 ><v-icon>mdi-eye</v-icon></v-btn
+              >
+              <v-btn icon color="success" v-if="checkForVideocall(item)" @click="openVideocall(item)"
+                ><v-icon>mdi-video-check</v-icon></v-btn
               >
               <v-btn icon color="yellow accent-4" v-if="checkForAppointmentRating(item)" @click="editRating(item)"
                 ><v-icon>mdi-star</v-icon></v-btn
@@ -76,6 +79,7 @@ import SettingsStore from "@/store/modules/settings";
 import AuthStore from "@/store/modules/auth";
 import AppointmentDetail from "@/components/patient/AppointmentDetail.vue"
 import Rating from "@/components/shared/Rating.vue";
+import GlobalsStore from "@/store/modules/globals";
 
 @Component({
   name: "BookedAppointments",
@@ -172,6 +176,13 @@ export default class BookedAppointments extends Vue {
     if ( someDate.startOf("day") < current.startOf("day") ) return false;
 
     return true;
+  }
+  checkForVideocall(item: any): boolean {
+    return item.apptStatus == this.ONGOING_STATUS.label;
+  }
+  openVideocall(item: any): void {
+    const url = `${GlobalsStore.NativeWindow.location.protocol}//${GlobalsStore.NativeWindow.location.host}/#/appointment-video-call/${item.id}`;
+    GlobalsStore.NativeWindow.open(url, "_blank");
   }
   editRating(item: any): void {
     this.ratingDialog = true;
