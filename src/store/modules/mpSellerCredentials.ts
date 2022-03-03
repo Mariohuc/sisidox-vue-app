@@ -7,6 +7,7 @@ import {
 } from "vuex-module-decorators";
 import store from "@/store";
 import HTTP from "@/http";
+import PUBLIC_HTTP from "@/public-http";
 import { MpSellerCredential } from "../models";
 
 config.rawError = true;
@@ -20,7 +21,7 @@ class MpSellerCredentialsStore extends VuexModule {
   
   @Action
   async getAll(params: { userId?: string, recordStatus?: string }): Promise<Array<MpSellerCredential>> {
-    const { data }: any = await HTTP().get('/mp-seller-credentials', { params })
+    const { data }: any = await PUBLIC_HTTP().get('/mp-seller-credentials', { params })
     return data.data;
   }
 

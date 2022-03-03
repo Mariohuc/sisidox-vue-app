@@ -9,6 +9,7 @@ import {
 import store from "@/store";
 import { DateTime } from "luxon";
 import HTTP from "@/http";
+import PUBLIC_HTTP from "@/public-http";
 
 config.rawError = true;
 
@@ -55,7 +56,7 @@ class BasicReportsStore extends VuexModule {
     doctorName?: string;
     recordStatus?: string;
   }) {
-    const { data }: any = await HTTP().get('/doctors-summary', { params: params })
+    const { data }: any = await PUBLIC_HTTP().get('/doctors-summary', { params: params })
     return data.data;
   }
 

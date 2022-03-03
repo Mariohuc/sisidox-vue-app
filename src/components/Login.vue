@@ -1,7 +1,7 @@
 <template>
   <v-dialog v-model="dialog" transition="dialog-top-transition" max-width="550">
     <template v-slot:activator="{ on, attrs }">
-      <v-btn class="pl-0" v-if="loggedIn" rounded :block="vertical" outlined @click="logout" :loading="loginBtnLoading">
+      <v-btn class="pl-0" v-if="loggedIn && showLogout" rounded :block="vertical" outlined @click="logout" :loading="loginBtnLoading">
           <v-avatar v-if="!vertical" size="35" left>
             <img
               :src="photoUrl"
@@ -10,8 +10,8 @@
           </v-avatar>
         <span class="ml-2">Salir</span>
       </v-btn>
-      <v-btn v-else rounded :block="vertical" outlined v-bind="attrs" v-on="on" :loading="loginBtnLoading"
-        ><span>Iniciar sesión</span></v-btn
+      <v-btn v-if="!loggedIn" rounded :block="vertical" outlined v-bind="attrs" v-on="on" :loading="loginBtnLoading"
+        ><span>{{ btnCustomText }}</span></v-btn
       >
     </template>
 
@@ -55,6 +55,8 @@ import { Prop } from "vue-property-decorator";
 })
 export default class Login extends Vue {
   @Prop({ default: false }) vertical!: boolean;
+  @Prop({ default: 'Iniciar sesión' }) btnCustomText!: string;
+  @Prop({ default: true }) showLogout!: boolean;
   dialog = false;
   get loggedIn(): boolean {
     return AuthStore.uid !== "" ? true : false;
@@ -69,8 +71,10 @@ export default class Login extends Vue {
     try {
       await AuthStore.signInWithGoogle();
       this.dialog = false;
+      this.$emit("successfulLoginEvent", true);
     } catch (error: any) {
       console.error(error.message);
+      this.$emit("successfulLoginEvent", false);
     }
   }
   

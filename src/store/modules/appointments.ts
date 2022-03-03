@@ -10,9 +10,9 @@ import {
   AppointmentTicket, AppStatus
 } from "../models";
 import store from "@/store";
-import firebase from "firebase";
 import { DateTime } from "luxon";
 import HTTP from "@/http";
+import PUBLIC_HTTP from "@/public-http";
 
 config.rawError = true;
 //type Nullable<T> = T | undefined | null;
@@ -158,7 +158,7 @@ class AppointmentsStore extends VuexModule {
     const rangeStart = DateTime.now().plus({ hours: 1 }).setZone("utc").toFormat('yyyy-LL-dd HH:mm:ss');
 
     const apptTickets: any = {};
-    const { data } = await HTTP().get('/appointment-tickets' , { params: { rangeStart, doctorId }});
+    const { data } = await PUBLIC_HTTP().get('/appointment-tickets' , { params: { rangeStart, doctorId }});
     const DATA : Array<any> = data.data;
     DATA.forEach((item) => {
       // doc.data() is never undefined for query doc snapshots

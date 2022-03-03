@@ -215,7 +215,8 @@
         </v-row>
 
         <div v-if="!mainFormFinished" class="d-flex justify-center">
-          <v-btn color="primary" @click="bookAppointmentWithSnackbar()" :loading="bookBtnLoading"> Reservar </v-btn>
+          <v-btn v-if="successfulLogin" rounded outlined color="primary" @click="bookAppointmentWithSnackbar(true)" :loading="bookBtnLoading"> Reservar </v-btn>
+          <login v-if="!successfulLogin" :btnCustomText="'Reservar'" :showLogout="false" @successfulLoginEvent="bookAppointmentWithSnackbar($event)"></login>
           <v-btn v-if="checkIfApptIsFree()" text @click="step = 2">
             Atrás
           </v-btn>
@@ -246,12 +247,13 @@ import { AppointmentTicket, DoctorSum, MpSellerCredential, SnackBarParams } from
 
 import GeneralSnackBar from "@/components/general/GeneralSnackBar.vue"
 import { getSnackBarErrorParams } from "@/general-utils";
-
+import login from "@/components/Login.vue"
 
 @Component({
   name: "ApptTicketsForBooking",
   components: {
-    GeneralSnackBar
+    GeneralSnackBar,
+    login
   }
 })
 export default class ApptTicketsForBooking extends Vue {
@@ -289,16 +291,22 @@ export default class ApptTicketsForBooking extends Vue {
 
   mpSellerCredential?: MpSellerCredential
   isAvailableToCharge = false
- 
+  successfulLogin = false
   created(): void {
     this.getMpSellerCredential(this.doctor.doctorId);
     this.getAppointmentTickets(this.doctor.doctorId);
+    this.initParams();
   }
 
   get colsPerPageItems(): number {
     return parseInt(String(12 / this.perPageItems), 10);
   }
-
+  get isLoggedIn(): boolean {
+    return !!AuthStore.uid;
+  }
+  initParams(): void{
+    this.successfulLogin = AuthStore.uid ? true : false
+  }
   async getMpSellerCredential(doctorId: string): Promise<void> {
     const [record]: Array<MpSellerCredential> = await MpSellerCredentialsStore.getAll({ userId: doctorId });
     if( record ){
@@ -350,15 +358,21 @@ export default class ApptTicketsForBooking extends Vue {
     if (!this.selectedTicket) return false;
     return this.selectedTicket.isFree;
   }
-  async bookAppointmentWithSnackbar(): Promise<void> {
-    this.snackBarParams = await this.bookAppointment()
+  async bookAppointmentWithSnackbar(isLoggedIn: boolean): Promise<void> {
+    this.successfulLogin = isLoggedIn;
+    
+    if( !isLoggedIn ){
+      this.snackBarParams = { snackbar: true, color: 'error', text: 'Debe iniciar sesión para poder reservar una cita!' };
+    }else{
+      this.snackBarParams = await this.bookAppointment();
+    }
   }
   async bookAppointment(): Promise<SnackBarParams>{
     try {
       this.bookBtnLoading = true;
       
       if( AuthStore.uid === this.doctor.doctorId ){
-        return { snackbar: true, color: 'warning', text: 'Debes ingresar con otra cuenta para reservar tu cita!' }
+        return { snackbar: true, color: 'warning', text: 'Debe ingresar con otra cuenta para reservar su cita!' }
       }
 
       let mercadoPagoData: any = undefined;
@@ -397,6 +411,15 @@ export default class ApptTicketsForBooking extends Vue {
       previousPatientComments: this.previousPatientComments,
       isFree: this.selectedTicket?.isFree,
       cost: this.selectedTicket?.cost,
+    }
+  }
+
+  async signInWithGoogle(): Promise<boolean> {
+    try {
+      await AuthStore.signInWithGoogle();
+      return true;
+    } catch (error: any) {
+      return false;
     }
   }
 }

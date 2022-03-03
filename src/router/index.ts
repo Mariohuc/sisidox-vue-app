@@ -22,10 +22,7 @@ const routes: Array<RouteConfig> = [
   {
     path: '/appointment-search',
     name: "AppointmentSearch",
-    component: AppointmentSearch,
-    meta: {
-      roles: [ Role.PATIENT, Role.DOCTOR ]
-    }
+    component: AppointmentSearch
   },
   {
     path: "/doctor",
