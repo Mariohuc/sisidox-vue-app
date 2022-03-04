@@ -298,7 +298,8 @@ import { Component, Vue, Watch } from "vue-property-decorator";
 import AppointmentsStore from "@/store/modules/appointments";
 import AuthStore from "@/store/modules/auth";
 import { DateTime, Interval } from "luxon";
-import { AppointmentTicket } from "@/store/models";
+import { AppointmentTicket, DoctorData } from "@/store/models";
+import DoctorDataStore from "@/store/modules/doctorData";
 
 interface VCalendar extends Vue {
   checkChange(): void;
@@ -409,6 +410,12 @@ export default class GeneralAgenda extends Vue {
 
   mounted(): void {
     this.$refs.calendar.checkChange();
+    this.fetchDoctorData()
+  }
+  async fetchDoctorData(): Promise<void>{
+    await DoctorDataStore.getDoctorData(AuthStore.uid);
+    this.defaultAppt.cost = DoctorDataStore.doctorData.appointmentCost;
+    this.defaultAppt.isFree = this.defaultAppt.cost == 0;
     this.editAppt = Object.assign({}, this.defaultAppt);
   }
   viewDay({ date }: any): void {
